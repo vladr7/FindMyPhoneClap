@@ -1,8 +1,10 @@
 package com.riviem.findmyphoneclap
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,11 +17,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.riviem.findmyphoneclap.features.clapdetecting.AudioClassificationTFLite
 import com.riviem.findmyphoneclap.ui.theme.FindMyPhoneClapTheme
 
+
 class MainActivity : ComponentActivity() {
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
+// Verifică dacă permisiunea este deja acordată
+
+// Verifică dacă permisiunea este deja acordată
+        if (!notificationManager.isNotificationPolicyAccessGranted) {
+
+            // Dacă nu, deschide ecranul de setări relevante
+            val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            startActivity(intent)
+        }
         val intent = Intent(applicationContext, AudioClassificationTFLite::class.java)
         applicationContext.startForegroundService(intent)
 
