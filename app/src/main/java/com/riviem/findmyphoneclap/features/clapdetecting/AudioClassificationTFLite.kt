@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -23,6 +24,7 @@ class AudioClassificationTFLite : Service() {
 
     companion object {
         const val CHANNEL_ID = "AudioClassificationChannel"
+        var isServiceRunning = false
     }
 
     override fun onCreate() {
@@ -56,17 +58,21 @@ class AudioClassificationTFLite : Service() {
             .setContentText("Classifying audio...")
             .setSmallIcon(R.drawable.ic_launcher_background)
             .build()
-        startForeground(1, notification)
-        CoroutineScope(Dispatchers.IO).launch { startRecording() }
+        if(!isServiceRunning) {
+            isServiceRunning = true
+            startForeground(1, notification)
+            CoroutineScope(Dispatchers.IO).launch { startRecording() }
+        }
         return START_STICKY
     }
 
     private suspend fun startRecording() {
         val audioRecord = audioClassifier.createAudioRecord()
         audioRecord.startRecording()
+        val mediaPlayer: MediaPlayer = MediaPlayer.create(this, R.raw.birdwhistle)
 
-        val nrOfSecondsToListen = 1000000000
-        var secondsCounter = 0
+        val nrOfSecondsToListen: Long = Long.MAX_VALUE
+        var secondsCounter = 0L
         while (secondsCounter < nrOfSecondsToListen) {
             delay(1000L)
             Log.d("AudioClassification", "Seconds passed: $secondsCounter")
@@ -75,11 +81,19 @@ class AudioClassificationTFLite : Service() {
             val listOfClassification: List<Classifications> = audioClassifier.classify(tensorAudio)
             for (classification in listOfClassification) {
                 for (category in classification.categories) {
-                    if (category.score > 0.3) {
+                    if(category.score > 0.3) {
                         Log.d("AudioClassification", "Category: ${category.label}, Score: ${category.score}")
+                    }
+                    if (category.label == Labels.CLAPPING.stringValue && category.score > 0.5) {
+                        if (!mediaPlayer.isPlaying) {
+                            mediaPlayer.start()
+                        }
                     }
                 }
             }
+        }
+        mediaPlayer.setOnCompletionListener { mp ->
+            mp.release()
         }
         audioRecord.stop()
         stopSelf()
