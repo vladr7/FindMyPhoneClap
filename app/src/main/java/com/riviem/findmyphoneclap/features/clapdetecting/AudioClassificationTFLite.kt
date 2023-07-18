@@ -1,70 +1,91 @@
 package com.riviem.findmyphoneclap.features.clapdetecting
 
-import android.content.Context
-import android.media.AudioRecord
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
+import android.content.Intent
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.riviem.findmyphoneclap.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.audio.TensorAudio
-import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
 import org.tensorflow.lite.task.audio.classifier.Classifications
 
-class AudioClassificationTFLite(
-    private val context: Context
-) : AudioClassification {
-
-    private val modelName = "lite-model_yamnet_classification_tflite_1.tflite"
-    private lateinit var audioRecord: AudioRecord
-
+class AudioClassificationTFLite : Service() {
     private lateinit var audioClassifier: AudioClassifier
-    private var tensorAudio: TensorAudio
+    private lateinit var tensorAudio: TensorAudio
 
-    init {
+    companion object {
+        const val CHANNEL_ID = "AudioClassificationChannel"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        println("vlad: onCreate")
+        val modelName = "lite-model_yamnet_classification_tflite_1.tflite"
         try {
             audioClassifier = AudioClassifier.createFromFile(
-                context,
+                applicationContext,
                 modelName
             )
         } catch (e: Exception) {
             e.printStackTrace()
         }
         tensorAudio = audioClassifier.createInputTensorAudio()
+
+        val serviceChannel = NotificationChannel(
+            CHANNEL_ID,
+            "Foreground Service Channel",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        val manager = getSystemService(
+            NotificationManager::class.java
+        )
+        manager.createNotificationChannel(serviceChannel)
     }
 
-    override fun startRecording() {
-        val format = audioClassifier.requiredTensorAudioFormat
-        val specs = "Number of channels ${format.channels}, \n" +
-                "Sample rate ${format.sampleRate}, \n" +
-                "Number of samples for input ${format.sampleRate}"
-        println(specs)
-        audioRecord = audioClassifier.createAudioRecord()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Audio Classification Service")
+            .setContentText("Classifying audio...")
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .build()
+        startForeground(1, notification)
+        CoroutineScope(Dispatchers.IO).launch { startRecording() }
+        return START_STICKY
+    }
+
+    private suspend fun startRecording() {
+        val audioRecord = audioClassifier.createAudioRecord()
         audioRecord.startRecording()
 
-        val nrOfSecondsToListen = 20
+        val nrOfSecondsToListen = 1000000000
         var secondsCounter = 0
-        val coroutineScope = CoroutineScope(Dispatchers.Main)
-        coroutineScope.launch {
-            val finalOutput: MutableList<Category> = mutableListOf()
-            while (secondsCounter < nrOfSecondsToListen) {
-                delay(1000L)
-                println("Seconds passed: $secondsCounter")
-                secondsCounter++
-                tensorAudio.load(audioRecord)
-                val listOfClassification: List<Classifications> = audioClassifier.classify(tensorAudio)
-                for (classification in listOfClassification) {
-                    for (category in classification.categories) {
-                        if (category.score > 0.3) {
-                            finalOutput.add(category)
-                        }
+        while (secondsCounter < nrOfSecondsToListen) {
+            delay(1000L)
+            Log.d("AudioClassification", "Seconds passed: $secondsCounter")
+            secondsCounter++
+            tensorAudio.load(audioRecord)
+            val listOfClassification: List<Classifications> = audioClassifier.classify(tensorAudio)
+            for (classification in listOfClassification) {
+                for (category in classification.categories) {
+                    if (category.score > 0.3) {
+                        Log.d("AudioClassification", "Category: ${category.label}, Score: ${category.score}")
                     }
                 }
             }
-            finalOutput.forEach {
-                println("Category: ${it.label}, Score: ${it.score}")
-            }
-            audioRecord.stop()
         }
+        audioRecord.stop()
+        stopSelf()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
 }

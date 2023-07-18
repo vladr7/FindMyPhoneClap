@@ -1,5 +1,7 @@
 package com.riviem.findmyphoneclap
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,11 +16,14 @@ import com.riviem.findmyphoneclap.features.clapdetecting.AudioClassificationTFLi
 import com.riviem.findmyphoneclap.ui.theme.FindMyPhoneClapTheme
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val intent = Intent(applicationContext, AudioClassificationTFLite::class.java)
+        applicationContext.startForegroundService(intent)
+
         setContent {
-            val audioClassificationTFLite = AudioClassificationTFLite(this)
-            audioClassificationTFLite.startRecording()
             FindMyPhoneClapTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
