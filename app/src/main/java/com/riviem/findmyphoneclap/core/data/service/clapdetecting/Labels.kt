@@ -1,4 +1,4 @@
-package com.riviem.findmyphoneclap.features.clapdetecting
+package com.riviem.findmyphoneclap.core.data.service.clapdetecting
 
 enum class Labels(val stringValue: String) {
     CLAPPING("Clapping"),
