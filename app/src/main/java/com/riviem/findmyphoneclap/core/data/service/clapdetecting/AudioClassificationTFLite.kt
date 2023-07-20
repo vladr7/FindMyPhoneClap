@@ -118,7 +118,8 @@ class AudioClassificationTFLite : Service() {
                                 // Setează volumul la maxim și modul la normal
                                 audioManager.setStreamVolume(
                                     AudioManager.STREAM_MUSIC,
-                                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+//                                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                                    5,
                                     0
                                 )
                                 audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
