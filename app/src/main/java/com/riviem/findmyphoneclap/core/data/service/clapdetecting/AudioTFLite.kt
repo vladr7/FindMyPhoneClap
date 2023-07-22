@@ -7,23 +7,38 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.riviem.findmyphoneclap.R
+import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
+import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.audio.TensorAudio
+import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
 import org.tensorflow.lite.task.audio.classifier.Classifications
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AudioClassificationTFLite : Service() {
+@Singleton
+@AndroidEntryPoint
+class AudioTFLite @Inject constructor(): Service() {
     private lateinit var audioClassifier: AudioClassifier
     private lateinit var tensorAudio: TensorAudio
+    private lateinit var audioRecord: AudioRecord
+    private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var audioManager: AudioManager
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
 
     companion object {
         const val CHANNEL_ID = "AudioClassificationChannel"
@@ -32,7 +47,6 @@ class AudioClassificationTFLite : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        println("vlad: onCreate")
         val modelName = "lite-model_yamnet_classification_tflite_1.tflite"
         try {
             audioClassifier = AudioClassifier.createFromFile(
@@ -76,20 +90,18 @@ class AudioClassificationTFLite : Service() {
     }
 
     private suspend fun startRecording() {
-        val audioRecord = audioClassifier.createAudioRecord()
+        audioRecord = audioClassifier.createAudioRecord()
         audioRecord.startRecording()
-        val mediaPlayer: MediaPlayer = MediaPlayer.create(
+        mediaPlayer = MediaPlayer.create(
             this,
             R.raw.birdwhistle
         )
         val songDuration = mediaPlayer.duration
-
-        val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         val nrOfSecondsToListen: Long = Long.MAX_VALUE
         var secondsCounter = 0L
         while (secondsCounter < nrOfSecondsToListen) {
-            // fac aici 2 coroutine, unu face load la tensor la secunda 5000, altul la jumatatea secundei (5500), dar tot delay de o secunda)???
             delay(1000L)
             Log.d(
                 "AudioClassification",
@@ -103,45 +115,10 @@ class AudioClassificationTFLite : Service() {
                     if (category.score > 0.1) {
                         Log.d(
                             "AudioClassification",
-                            "Category: ${category.label}, Score: ${category.score}"
-                        )
+                            "Category: ${category.label}, Score: ${category.score}")
                     }
-                    if (category.label == Labels.CLAPPING.stringValue &&
-                        category.score > 0.5
-                    ) {
-                        // Salvează starea curentă a volumului și modului
-                        val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                        val originalRingerMode = audioManager.ringerMode
-
-                        if (!mediaPlayer.isPlaying) {
-                            try {
-                                // Setează volumul la maxim și modul la normal
-                                audioManager.setStreamVolume(
-                                    AudioManager.STREAM_MUSIC,
-//                                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
-                                    5,
-                                    0
-                                )
-                                audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
-
-                                // Redă sunetul
-                                mediaPlayer.start()
-
-                            } finally {
-                                coroutineScope {
-                                    launch {
-                                        delay(songDuration.toLong())
-                                        // Restaurează starea originală a volumului și modului
-                                        audioManager.setStreamVolume(
-                                            AudioManager.STREAM_MUSIC,
-                                            originalVolume,
-                                            0
-                                        )
-                                        audioManager.ringerMode = originalRingerMode
-                                    }
-                                }
-                            }
-                        }
+                    if (shouldPlaySound(category)) {
+                        playSound(songDuration)
                     }
                 }
             }
@@ -150,6 +127,54 @@ class AudioClassificationTFLite : Service() {
             mp.release()
         }
         audioRecord.stop()
+        stopSelf()
+    }
+
+    private suspend fun shouldPlaySound(category: Category): Boolean {
+        val userScore = convertSensitivityToScore(settingsRepository.getSensitivity())
+        return category.label == Labels.CLAPPING.stringValue &&
+                category.score > userScore
+    }
+
+    private fun convertSensitivityToScore(sensitivity: Int): Double {
+        return 1 - (sensitivity.toDouble() / 100)
+    }
+
+    private suspend fun playSound(songDuration: Int) {
+        val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        val originalRingerMode = audioManager.ringerMode
+        if (!mediaPlayer.isPlaying) {
+            try {
+                audioManager.setStreamVolume(
+                    AudioManager.STREAM_MUSIC,
+//                                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                    5,
+                    0
+                )
+                audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                mediaPlayer.start()
+
+            } finally {
+                coroutineScope {
+                    launch {
+                        delay(songDuration.toLong())
+                        audioManager.setStreamVolume(
+                            AudioManager.STREAM_MUSIC,
+                            originalVolume,
+                            0
+                        )
+                        audioManager.ringerMode = originalRingerMode
+                    }
+                }
+            }
+        }
+    }
+
+    fun stopService() {
+        audioClassifier.close()
+        audioRecord.stop()
+        audioRecord.release()
+        mediaPlayer.release()
         stopSelf()
     }
 
