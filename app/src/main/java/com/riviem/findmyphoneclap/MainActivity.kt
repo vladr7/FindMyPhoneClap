@@ -13,55 +13,53 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioClassificationTFLite
+import com.riviem.findmyphoneclap.navigation.MainNavigation
 import com.riviem.findmyphoneclap.ui.theme.FindMyPhoneClapTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+//        startService()
 
-// Verifică dacă permisiunea este deja acordată
-
-// Verifică dacă permisiunea este deja acordată
-        if (!notificationManager.isNotificationPolicyAccessGranted) {
-
-            // Dacă nu, deschide ecranul de setări relevante
-            val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-            startActivity(intent)
-        }
-        val intent = Intent(applicationContext, AudioClassificationTFLite::class.java)
-        applicationContext.startForegroundService(intent)
-
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
+            val viewModel: MainViewModel = hiltViewModel()
+            val state = viewModel.state.collectAsStateWithLifecycle()
             FindMyPhoneClapTheme {
-                // A surface container using the 'background' color from the theme
+                window?.statusBarColor =
+                    MaterialTheme.colorScheme.secondary.toArgb()
+                window?.navigationBarColor =
+                    MaterialTheme.colorScheme.secondary.toArgb()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    MainNavigation()
                 }
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FindMyPhoneClapTheme {
-        Greeting("Android")
+    private fun startService() {
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (!notificationManager.isNotificationPolicyAccessGranted) {
+            val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            startActivity(intent)
+        }
+        val intent = Intent(
+            applicationContext,
+            AudioClassificationTFLite::class.java
+        )
+        applicationContext.startForegroundService(intent)
     }
 }
+
