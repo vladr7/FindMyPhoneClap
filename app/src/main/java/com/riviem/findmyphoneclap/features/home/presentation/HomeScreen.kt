@@ -1,6 +1,7 @@
 package com.riviem.findmyphoneclap.features.home.presentation
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -9,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -37,10 +39,16 @@ fun HomeScreen(
     sensitivity: Int,
     onSensitivityChange: (Int) -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = "HomeScreen",
             fontSize = 30.sp,
+            modifier = Modifier
+                .padding(top = 24.dp)
         )
         SensitivitySlider(
             sensitivity = sensitivity,
@@ -56,7 +64,8 @@ fun SensitivitySlider(
 ) {
     Column(
         modifier = Modifier
-            .padding(start = 24.dp, end = 24.dp)
+            .padding(30.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Sensitivity $sensitivity")
         Slider(
