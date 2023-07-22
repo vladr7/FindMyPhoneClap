@@ -19,6 +19,17 @@ class HomeViewModel @Inject constructor(
     val state: StateFlow<HomeViewState> = _state
 
     init {
+        initSensitivity()
+        initService()
+    }
+
+    private fun initService() {
+        viewModelScope.launch {
+            audioClassificationRepository.startService()
+        }
+    }
+
+    private fun initSensitivity() {
         viewModelScope.launch {
             val sensitivity = audioClassificationRepository.getSensitivity()
             _state.update {

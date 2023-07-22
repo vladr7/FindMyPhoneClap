@@ -27,7 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".core.data.service.clapdetecting.AudioClassificationTFLite" />
+        <service android:name=".core.data.service.clapdetecting.AudioTFLite" />
     </application>
 
 </manifest>

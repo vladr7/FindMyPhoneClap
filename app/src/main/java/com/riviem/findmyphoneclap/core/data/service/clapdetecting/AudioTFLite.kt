@@ -7,11 +7,13 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.riviem.findmyphoneclap.R
+import com.riviem.findmyphoneclap.core.constants.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -20,10 +22,16 @@ import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.audio.TensorAudio
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
 import org.tensorflow.lite.task.audio.classifier.Classifications
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AudioClassificationTFLite : Service() {
+@Singleton
+class AudioTFLite @Inject constructor() : Service() {
     private lateinit var audioClassifier: AudioClassifier
     private lateinit var tensorAudio: TensorAudio
+    private lateinit var audioRecord: AudioRecord
+    private lateinit var mediaPlayer: MediaPlayer
+    var sensitivity = Constants.SENSITIVITY_DEFAULT
 
     companion object {
         const val CHANNEL_ID = "AudioClassificationChannel"
@@ -76,9 +84,9 @@ class AudioClassificationTFLite : Service() {
     }
 
     private suspend fun startRecording() {
-        val audioRecord = audioClassifier.createAudioRecord()
+        audioRecord = audioClassifier.createAudioRecord()
         audioRecord.startRecording()
-        val mediaPlayer: MediaPlayer = MediaPlayer.create(
+        mediaPlayer = MediaPlayer.create(
             this,
             R.raw.birdwhistle
         )
@@ -150,6 +158,14 @@ class AudioClassificationTFLite : Service() {
             mp.release()
         }
         audioRecord.stop()
+        stopSelf()
+    }
+
+    fun stopService() {
+        audioClassifier.close()
+        audioRecord.stop()
+        audioRecord.release()
+        mediaPlayer.release()
         stopSelf()
     }
 
