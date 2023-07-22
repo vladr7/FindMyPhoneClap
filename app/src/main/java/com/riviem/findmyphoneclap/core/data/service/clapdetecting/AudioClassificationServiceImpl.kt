@@ -25,8 +25,4 @@ class AudioClassificationServiceImpl @Inject constructor(
     override fun stopService() {
         audioTFLite.stopService()
     }
-
-    override fun setSensitivity(sensitivity: Int) {
-        audioTFLite.sensitivity = sensitivity
-    }
 }

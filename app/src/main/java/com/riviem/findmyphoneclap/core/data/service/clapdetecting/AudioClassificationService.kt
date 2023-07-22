@@ -4,5 +4,4 @@ interface AudioClassificationService {
 
     suspend fun startService()
     fun stopService()
-    fun setSensitivity(sensitivity: Int)
 }

@@ -4,8 +4,8 @@ import android.app.Service
 import android.content.Context
 import com.riviem.findmyphoneclap.core.data.datasource.local.DefaultDataStore
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
-import com.riviem.findmyphoneclap.core.data.repository.audioclassification.AudioClassificationRepository
-import com.riviem.findmyphoneclap.core.data.repository.audioclassification.AudioClassificationRepositoryImpl
+import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
+import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioClassificationService
 import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioClassificationServiceImpl
 import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioTFLite
@@ -30,8 +30,12 @@ object CoreModule {
 
     @Singleton
     @Provides
-    fun provideAudioTFLite(
-    ): Service = AudioTFLite()
+    fun provideSettingsRepository(
+        localStorage: LocalStorage
+    ): SettingsRepository = SettingsRepositoryImpl(
+        localStorage = localStorage
+    )
+
 
     @Singleton
     @Provides
@@ -41,15 +45,5 @@ object CoreModule {
     ): AudioClassificationService = AudioClassificationServiceImpl(
         context = context,
         audioTFLite = audioTFLite
-    )
-
-    @Singleton
-    @Provides
-    fun provideAudioClassificationRepository(
-        localStorage: LocalStorage,
-        audioClassificationService: AudioClassificationService
-    ): AudioClassificationRepository = AudioClassificationRepositoryImpl(
-        localStorage = localStorage,
-        audioClassificationService = audioClassificationService
     )
 }

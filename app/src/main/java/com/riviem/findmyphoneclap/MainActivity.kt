@@ -1,10 +1,7 @@
 package com.riviem.findmyphoneclap
 
 import android.annotation.SuppressLint
-import android.app.NotificationManager
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +12,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioTFLite
 import com.riviem.findmyphoneclap.navigation.MainNavigation
 import com.riviem.findmyphoneclap.ui.theme.FindMyPhoneClapTheme
 import dagger.hilt.android.AndroidEntryPoint
