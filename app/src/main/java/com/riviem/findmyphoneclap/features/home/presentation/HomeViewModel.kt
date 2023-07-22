@@ -22,12 +22,16 @@ class HomeViewModel @Inject constructor(
 
     init {
         initSensitivity()
-        initService()
+        checkAndInitIsServiceActivated()
     }
 
-    private fun initService() {
+    private fun checkAndInitIsServiceActivated() {
         viewModelScope.launch {
-            audioClassificationService.startService()
+            val isServiceActivated = settingsRepository.getServiceActivated()
+            _state.update {
+                it.copy(isServiceActivated = isServiceActivated)
+            }
+            if(isServiceActivated) audioClassificationService.startService()
         }
     }
 
@@ -48,8 +52,29 @@ class HomeViewModel @Inject constructor(
             it.copy(sensitivity = newValue)
         }
     }
+
+    fun configureService() {
+        viewModelScope.launch {
+            val isServiceActivated = settingsRepository.getServiceActivated()
+            if(isServiceActivated) {
+                audioClassificationService.stopService()
+                settingsRepository.setServiceActivated(false)
+                _state.update {
+                    it.copy(isServiceActivated = false)
+                }
+            } else {
+                audioClassificationService.startService()
+                settingsRepository.setServiceActivated(true)
+                _state.update {
+                    it.copy(isServiceActivated = true)
+                }
+            }
+
+        }
+    }
 }
 
 data class HomeViewState(
-    val sensitivity: Int = 0
+    val sensitivity: Int = 0,
+    val isServiceActivated: Boolean = false
 )

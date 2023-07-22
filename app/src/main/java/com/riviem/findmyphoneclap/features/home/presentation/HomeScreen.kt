@@ -3,16 +3,18 @@ package com.riviem.findmyphoneclap.features.home.presentation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,7 +31,11 @@ fun HomeRoute(
         sensitivity = state.sensitivity,
         onSensitivityChange = { newValue ->
             viewModel.onSensitivityChange(newValue)
-        }
+        },
+        onActivationClick = {
+            viewModel.configureService()
+        },
+        isActive = state.isServiceActivated
     )
 }
 
@@ -37,7 +43,9 @@ fun HomeRoute(
 @Composable
 fun HomeScreen(
     sensitivity: Int,
-    onSensitivityChange: (Int) -> Unit
+    onSensitivityChange: (Int) -> Unit,
+    onActivationClick: () -> Unit,
+    isActive: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -50,9 +58,40 @@ fun HomeScreen(
             modifier = Modifier
                 .padding(top = 24.dp)
         )
+        ActivationButton(
+            onActivationClick = onActivationClick,
+            isActive = isActive
+        )
         SensitivitySlider(
             sensitivity = sensitivity,
             onSensitivityChange = onSensitivityChange
+        )
+    }
+}
+
+@Composable
+fun ActivationButton(
+    onActivationClick: () -> Unit,
+    isActive: Boolean
+) {
+    Button(
+        onClick = {
+            onActivationClick()
+        },
+
+        modifier = Modifier.padding(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isActive) {
+                Color.Red
+            } else {
+                Color.Green
+            }
+        ),
+    ) {
+        Text(
+            text = if (isActive) "Deactivate" else "Activate",
+            color = Color.White,
+            style = TextStyle(fontWeight = FontWeight.Bold)
         )
     }
 }
