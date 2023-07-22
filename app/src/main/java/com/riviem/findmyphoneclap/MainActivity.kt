@@ -13,11 +13,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioClassificationTFLite
+import com.riviem.findmyphoneclap.navigation.MainNavigation
 import com.riviem.findmyphoneclap.ui.theme.FindMyPhoneClapTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,18 +28,22 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startService()
+//        startService()
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val viewModel: MainViewModel = hiltViewModel()
             val state = viewModel.state.collectAsStateWithLifecycle()
             FindMyPhoneClapTheme {
+                window?.statusBarColor =
+                    MaterialTheme.colorScheme.secondary.toArgb()
+                window?.navigationBarColor =
+                    MaterialTheme.colorScheme.secondary.toArgb()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    MainNavigation()
                 }
             }
         }
@@ -57,18 +63,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FindMyPhoneClapTheme {
-        Greeting("Android")
-    }
-}
