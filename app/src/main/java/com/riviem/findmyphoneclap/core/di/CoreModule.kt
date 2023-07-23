@@ -41,9 +41,7 @@ object CoreModule {
     @Provides
     fun provideAudioClassificationService(
         @ApplicationContext context: Context,
-        audioTFLite: AudioTFLite
     ): AudioClassificationService = AudioClassificationServiceImpl(
         context = context,
-        audioTFLite = audioTFLite
     )
 }

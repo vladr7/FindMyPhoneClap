@@ -1,5 +1,6 @@
 package com.riviem.findmyphoneclap.core.data.service.clapdetecting
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,6 +10,7 @@ import android.content.Intent
 import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.MediaPlayer
+import android.os.Binder
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -18,6 +20,7 @@ import com.riviem.findmyphoneclap.core.data.repository.audioclassification.Setti
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -36,9 +39,16 @@ class AudioTFLite @Inject constructor(): Service() {
     private lateinit var audioRecord: AudioRecord
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var audioManager: AudioManager
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
+
+    inner class LocalBinder : Binder() {
+        fun getService(): AudioTFLite = this@AudioTFLite
+    }
+
+    private val binder = LocalBinder()
 
     companion object {
         const val CHANNEL_ID = "AudioClassificationChannel"
@@ -69,6 +79,7 @@ class AudioTFLite @Inject constructor(): Service() {
         manager.createNotificationChannel(serviceChannel)
     }
 
+    @SuppressLint("ForegroundServiceType")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val notification: Notification = NotificationCompat.Builder(
             this,
@@ -84,7 +95,7 @@ class AudioTFLite @Inject constructor(): Service() {
                 1,
                 notification
             )
-            CoroutineScope(Dispatchers.IO).launch { startRecording() }
+            coroutineScope.launch { startRecording() }
         }
         return START_STICKY
     }
@@ -147,8 +158,7 @@ class AudioTFLite @Inject constructor(): Service() {
             try {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_MUSIC,
-//                                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
-                    5,
+                    convertVolumeToStreamVolume(settingsRepository.getVolume()),
                     0
                 )
                 audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
@@ -170,15 +180,30 @@ class AudioTFLite @Inject constructor(): Service() {
         }
     }
 
+    private fun convertVolumeToStreamVolume(volume: Int): Int {
+        return (volume * 0.15).toInt()
+    }
+
     fun stopService() {
-        audioClassifier.close()
-        audioRecord.stop()
-        audioRecord.release()
-        mediaPlayer.release()
+        coroutineScope.cancel("Service stopped")
+        isServiceRunning = false
         stopSelf()
+        try {
+            if (this::audioClassifier.isInitialized && !audioClassifier.isClosed) {
+                audioClassifier.close()
+            }
+            if(this::audioRecord.isInitialized) {
+                audioRecord.release()
+            }
+            if(this::mediaPlayer.isInitialized) {
+                mediaPlayer.release()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        return null
+        return binder
     }
 }
