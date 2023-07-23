@@ -158,8 +158,7 @@ class AudioTFLite @Inject constructor(): Service() {
             try {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_MUSIC,
-//                                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
-                    5,
+                    convertVolumeToStreamVolume(settingsRepository.getVolume()),
                     0
                 )
                 audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
@@ -179,6 +178,10 @@ class AudioTFLite @Inject constructor(): Service() {
                 }
             }
         }
+    }
+
+    private fun convertVolumeToStreamVolume(volume: Int): Int {
+        return (volume * 0.15).toInt()
     }
 
     fun stopService() {

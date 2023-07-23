@@ -4,4 +4,5 @@ object LocalStorageKeys {
 
     const val SENSITIVITY = "sensitivity"
     const val SERVICE_ACTIVATED = "service_activated"
+    const val VOLUME = "volume"
 }

@@ -35,7 +35,11 @@ fun HomeRoute(
         onActivationClick = {
             viewModel.configureService()
         },
-        isActive = state.isServiceActivated
+        isActive = state.isServiceActivated,
+        volume = state.volume,
+        onVolumeChange = { newValue ->
+            viewModel.onVolumeChange(newValue)
+        }
     )
 }
 
@@ -45,7 +49,9 @@ fun HomeScreen(
     sensitivity: Int,
     onSensitivityChange: (Int) -> Unit,
     onActivationClick: () -> Unit,
-    isActive: Boolean
+    isActive: Boolean,
+    volume: Int,
+    onVolumeChange: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -65,6 +71,10 @@ fun HomeScreen(
         SensitivitySlider(
             sensitivity = sensitivity,
             onSensitivityChange = onSensitivityChange
+        )
+        VolumeSlider(
+            volume = volume,
+            onVolumeChange = onVolumeChange
         )
     }
 }
@@ -113,6 +123,28 @@ fun SensitivitySlider(
                 onSensitivityChange(newValue.toInt())
             },
             valueRange = 5f..100f,
+            steps = 100
+        )
+    }
+}
+
+@Composable
+fun VolumeSlider(
+    volume: Int,
+    onVolumeChange: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(30.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Volume $volume")
+        Slider(
+            value = volume.toFloat(),
+            onValueChange = { newValue ->
+                onVolumeChange(newValue.toInt())
+            },
+            valueRange = 0f..100f,
             steps = 100
         )
     }

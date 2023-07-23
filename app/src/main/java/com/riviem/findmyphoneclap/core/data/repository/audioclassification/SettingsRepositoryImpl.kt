@@ -17,6 +17,14 @@ class SettingsRepositoryImpl @Inject constructor(
         return localStorage.getInt(LocalStorageKeys.SENSITIVITY, Constants.SENSITIVITY_DEFAULT)
     }
 
+    override suspend fun setVolume(volume: Int) {
+        localStorage.putInt(LocalStorageKeys.VOLUME, volume)
+    }
+
+    override suspend fun getVolume(): Int {
+        return localStorage.getInt(LocalStorageKeys.VOLUME, Constants.VOLUME_DEFAULT)
+    }
+
     override suspend fun setServiceActivated(isActivated: Boolean) {
         localStorage.putBoolean(LocalStorageKeys.SERVICE_ACTIVATED, isActivated)
     }
@@ -24,4 +32,6 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun getServiceActivated(): Boolean {
         return localStorage.getBoolean(LocalStorageKeys.SERVICE_ACTIVATED, false)
     }
+
+
 }

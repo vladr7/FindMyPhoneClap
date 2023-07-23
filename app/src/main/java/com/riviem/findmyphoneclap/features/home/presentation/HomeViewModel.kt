@@ -22,7 +22,17 @@ class HomeViewModel @Inject constructor(
 
     init {
         initSensitivity()
+        initVolume()
         checkAndInitIsServiceActivated()
+    }
+
+    private fun initVolume() {
+        viewModelScope.launch {
+            val volume = settingsRepository.getVolume()
+            _state.update {
+                it.copy(volume = volume)
+            }
+        }
     }
 
     private fun checkAndInitIsServiceActivated() {
@@ -41,6 +51,15 @@ class HomeViewModel @Inject constructor(
             _state.update {
                 it.copy(sensitivity = sensitivity)
             }
+        }
+    }
+
+    fun onVolumeChange(newValue: Int) {
+        viewModelScope.launch {
+            settingsRepository.setVolume(newValue)
+        }
+        _state.update {
+            it.copy(volume = newValue)
         }
     }
 
@@ -76,5 +95,6 @@ class HomeViewModel @Inject constructor(
 
 data class HomeViewState(
     val sensitivity: Int = 0,
-    val isServiceActivated: Boolean = false
+    val isServiceActivated: Boolean = false,
+    val volume: Int = 0
 )
