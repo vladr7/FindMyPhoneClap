@@ -2,7 +2,6 @@ package com.riviem.findmyphoneclap.features.home.presentation
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -49,7 +48,7 @@ fun HomeRoute(
         onActivationClick = {
             viewModel.configureService()
         },
-        isActive = state.isServiceActivated,
+        isServiceActive = state.isServiceActivated,
         volume = state.volume,
         onVolumeChange = { newValue ->
             viewModel.onVolumeChange(newValue)
@@ -57,6 +56,7 @@ fun HomeRoute(
         onBypassDoNotDisturbClick = {
             viewModel.onBypassDoNotDisturbClick()
         },
+        isBypassDNDActive = state.isBypassDNDActive,
         shouldAskForMicrophonePermission = state.shouldAskForMicrophonePermission,
         onMicrophonePermissionFlowDone = {
             viewModel.resetShouldAskForMicrophonePermission()
@@ -72,14 +72,15 @@ fun HomeScreen(
     sensitivity: Int,
     onSensitivityChange: (Int) -> Unit,
     onActivationClick: () -> Unit,
-    isActive: Boolean,
+    isServiceActive: Boolean,
     volume: Int,
     onVolumeChange: (Int) -> Unit,
     onBypassDoNotDisturbClick: () -> Unit,
+    isBypassDNDActive : Boolean,
     shouldAskForMicrophonePermission: Boolean,
     onMicrophonePermissionFlowDone: () -> Unit,
     activity: Activity,
-    context: Context
+    context: Context,
 ) {
     Column(
         modifier = Modifier
@@ -94,7 +95,7 @@ fun HomeScreen(
         )
         ActivationButton(
             onActivationClick = onActivationClick,
-            isActive = isActive
+            isActive = isServiceActive
         )
         SensitivitySlider(
             sensitivity = sensitivity,
@@ -105,7 +106,8 @@ fun HomeScreen(
             onVolumeChange = onVolumeChange
         )
         BypassDoNotDisturbButton(
-            onBypassDoNotDisturbClick = onBypassDoNotDisturbClick
+            onActivationClick = onBypassDoNotDisturbClick,
+            isActive = isBypassDNDActive
         )
         if (shouldAskForMicrophonePermission) {
             MicrophonePermissionDialog(
@@ -164,26 +166,30 @@ fun MicrophonePermissionDialog(
 
 @Composable
 fun BypassDoNotDisturbButton(
-    modifier: Modifier = Modifier,
-    onBypassDoNotDisturbClick: () -> Unit
+    onActivationClick: () -> Unit,
+    isActive: Boolean
 ) {
     Button(
         onClick = {
-            onBypassDoNotDisturbClick()
+            onActivationClick()
         },
-        modifier = modifier.padding(16.dp),
+
+        modifier = Modifier.padding(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Blue
+            containerColor = if (isActive) {
+                Color.Red
+            } else {
+                Color.Green
+            }
         ),
     ) {
         Text(
-            text = "Bypass Do Not Disturb",
+            text = if (isActive) "Deactivate Bypass DND" else "Activate Bypass DND",
             color = Color.White,
             style = TextStyle(fontWeight = FontWeight.Bold)
         )
     }
 }
-
 @Composable
 fun ActivationButton(
     onActivationClick: () -> Unit,

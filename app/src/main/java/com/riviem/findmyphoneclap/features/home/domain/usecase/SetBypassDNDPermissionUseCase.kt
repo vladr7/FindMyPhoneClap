@@ -4,10 +4,10 @@ import com.riviem.findmyphoneclap.core.data.repository.audioclassification.Setti
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import javax.inject.Inject
 
-class HasBypassDNDPermissionUseCase @Inject constructor(
+class SetBypassDNDPermissionUseCase @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) {
-    suspend fun execute(): BypassDNDState {
-        return settingsRepository.hasBypassDoNotDisturbPermission()
+    suspend fun execute(isEnabled: Boolean) {
+        settingsRepository.setByPassDoNotDisturbPermission(isEnabled)
     }
 }

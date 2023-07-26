@@ -15,8 +15,8 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.riviem.findmyphoneclap.R
-import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
+import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -153,6 +153,9 @@ class AudioTFLite @Inject constructor(): Service() {
 
     private suspend fun playSound(songDuration: Int) {
         val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        if(!shouldBypassDNDPermission(originalVolume)) {
+            return
+        }
         val originalRingerMode = audioManager.ringerMode
         if (!mediaPlayer.isPlaying) {
             try {
@@ -176,6 +179,17 @@ class AudioTFLite @Inject constructor(): Service() {
                         audioManager.ringerMode = originalRingerMode
                     }
                 }
+            }
+        }
+    }
+
+    private suspend fun shouldBypassDNDPermission(originalVolume: Int): Boolean {
+        return when(settingsRepository.hasBypassDoNotDisturbPermission()) {
+            BypassDNDState.ENABLED -> {
+                true
+            }
+            else -> {
+                originalVolume != 0
             }
         }
     }

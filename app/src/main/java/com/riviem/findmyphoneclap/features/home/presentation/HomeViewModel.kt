@@ -2,11 +2,14 @@ package com.riviem.findmyphoneclap.features.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import com.riviem.findmyphoneclap.features.home.domain.usecase.AskForBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.GetSensitivityUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.GetVolumeUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.HasBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.HasMicrophonePermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.IsServiceRunningUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.SetBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetSensitivityUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetVolumeUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.StartServiceUseCase
@@ -28,7 +31,9 @@ class HomeViewModel @Inject constructor(
     private val setVolumeUseCase: SetVolumeUseCase,
     private val setSensitivityUseCase: SetSensitivityUseCase,
     private val startServiceUseCase: StartServiceUseCase,
-    private val stopServiceUseCase: StopServiceUseCase
+    private val stopServiceUseCase: StopServiceUseCase,
+    private val hasBypassDNDPermissionUseCase: HasBypassDNDPermissionUseCase,
+    private val setBypassDNDPermissionUseCase: SetBypassDNDPermissionUseCase
 ): ViewModel() {
 
     private val _state = MutableStateFlow<HomeViewState>(HomeViewState())
@@ -38,6 +43,24 @@ class HomeViewModel @Inject constructor(
         initSensitivity()
         initVolume()
         initServiceState()
+        initBypassDNDState()
+    }
+
+    private fun initBypassDNDState() {
+        viewModelScope.launch {
+            when(hasBypassDNDPermissionUseCase.execute()) {
+                BypassDNDState.ENABLED -> {
+                    _state.update {
+                        it.copy(isBypassDNDActive = true)
+                    }
+                }
+                else -> {
+                    _state.update {
+                        it.copy(isBypassDNDActive = false)
+                    }
+                }
+            }
+        }
     }
 
     private fun initServiceState() {
@@ -119,7 +142,23 @@ class HomeViewModel @Inject constructor(
 
     fun onBypassDoNotDisturbClick() {
         viewModelScope.launch {
-            askForBypassDNDPermissionUseCase.execute()
+            when(hasBypassDNDPermissionUseCase.execute()) {
+                BypassDNDState.ENABLED -> {
+                    setBypassDNDPermissionUseCase.execute(false)
+                    _state.update {
+                        it.copy(isBypassDNDActive = false)
+                    }
+                }
+                BypassDNDState.DISABLED_FROM_LOCAL_STORAGE -> {
+                    setBypassDNDPermissionUseCase.execute(true)
+                    _state.update {
+                        it.copy(isBypassDNDActive = true)
+                    }
+                }
+                BypassDNDState.DISABLED_FROM_SYSTEM -> {
+                    askForBypassDNDPermissionUseCase.execute()
+                }
+            }
         }
     }
 
@@ -135,4 +174,5 @@ data class HomeViewState(
     val volume: Int = 0,
     val isServiceActivated: Boolean = false,
     val shouldAskForMicrophonePermission: Boolean = false,
+    val isBypassDNDActive: Boolean = false
 )

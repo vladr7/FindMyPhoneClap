@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.riviem.findmyphoneclap.core.constants.Constants
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorageKeys
+import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import javax.inject.Inject
 
 
@@ -57,14 +58,32 @@ class SettingsRepositoryImpl @Inject constructor(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun hasBypassDoNotDisturbPermission(): Boolean {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        return notificationManager.isNotificationPolicyAccessGranted
-    }
-
     override fun askForBypassDoNotDisturbPermission() {
         val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
+    }
+
+    override suspend fun hasBypassDoNotDisturbPermission(): BypassDNDState {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (!notificationManager.isNotificationPolicyAccessGranted) {
+            return BypassDNDState.DISABLED_FROM_SYSTEM
+        }
+        val localStorageValue =  localStorage.getBoolean(
+            LocalStorageKeys.BYPASS_DO_NOT_DISTURB_PERMISSION_ENABLED,
+            false
+        )
+        if(!localStorageValue) {
+            return BypassDNDState.DISABLED_FROM_LOCAL_STORAGE
+        }
+        return BypassDNDState.ENABLED
+    }
+
+    override suspend fun setByPassDoNotDisturbPermission(isEnabled: Boolean) {
+        localStorage.putBoolean(
+            LocalStorageKeys.BYPASS_DO_NOT_DISTURB_PERMISSION_ENABLED,
+            isEnabled
+        )
     }
 }
