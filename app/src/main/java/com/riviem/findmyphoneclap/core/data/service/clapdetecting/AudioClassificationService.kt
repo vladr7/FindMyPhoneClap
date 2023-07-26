@@ -4,4 +4,5 @@ interface AudioClassificationService {
 
     suspend fun startService()
     fun stopService()
+    fun isServiceRunning(): Boolean
 }

@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.riviem.findmyphoneclap.MainActivity
 
 @Composable
 fun HomeRoute(
@@ -26,6 +27,7 @@ fun HomeRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = context as MainActivity
 
     HomeScreen(
         sensitivity = state.sensitivity,
@@ -33,12 +35,15 @@ fun HomeRoute(
             viewModel.onSensitivityChange(newValue)
         },
         onActivationClick = {
-            viewModel.configureService()
+            viewModel.configureService(activity = activity)
         },
         isActive = state.isServiceActivated,
         volume = state.volume,
         onVolumeChange = { newValue ->
             viewModel.onVolumeChange(newValue)
+        },
+        onBypassDoNotDisturbClick = {
+            viewModel.onBypassDoNotDisturbClick()
         }
     )
 }
@@ -51,7 +56,8 @@ fun HomeScreen(
     onActivationClick: () -> Unit,
     isActive: Boolean,
     volume: Int,
-    onVolumeChange: (Int) -> Unit
+    onVolumeChange: (Int) -> Unit,
+    onBypassDoNotDisturbClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -75,6 +81,31 @@ fun HomeScreen(
         VolumeSlider(
             volume = volume,
             onVolumeChange = onVolumeChange
+        )
+        BypassDoNotDisturbButton(
+            onBypassDoNotDisturbClick = onBypassDoNotDisturbClick
+        )
+    }
+}
+
+@Composable
+fun BypassDoNotDisturbButton(
+    modifier: Modifier = Modifier,
+    onBypassDoNotDisturbClick: () -> Unit
+) {
+    Button(
+        onClick = {
+            onBypassDoNotDisturbClick()
+        },
+        modifier = modifier.padding(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Blue
+        ),
+    ) {
+        Text(
+            text = "Bypass Do Not Disturb",
+            color = Color.White,
+            style = TextStyle(fontWeight = FontWeight.Bold)
         )
     }
 }

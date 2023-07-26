@@ -28,12 +28,6 @@ class AudioClassificationServiceImpl @Inject constructor(
     }
 
     override suspend fun startService() {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (!notificationManager.isNotificationPolicyAccessGranted) {
-            val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-        }
         val intent = Intent(context, AudioTFLite::class.java)
         context.startForegroundService(intent)
         context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
@@ -45,5 +39,9 @@ class AudioClassificationServiceImpl @Inject constructor(
             bound = false
         }
         audioTFLite.stopService()
+    }
+
+    override fun isServiceRunning(): Boolean {
+        return bound
     }
 }

@@ -1,6 +1,5 @@
 package com.riviem.findmyphoneclap.core.di
 
-import android.app.Service
 import android.content.Context
 import com.riviem.findmyphoneclap.core.data.datasource.local.DefaultDataStore
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
@@ -8,7 +7,6 @@ import com.riviem.findmyphoneclap.core.data.repository.audioclassification.Setti
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioClassificationService
 import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioClassificationServiceImpl
-import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioTFLite
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,8 +29,10 @@ object CoreModule {
     @Singleton
     @Provides
     fun provideSettingsRepository(
+        @ApplicationContext context: Context,
         localStorage: LocalStorage
     ): SettingsRepository = SettingsRepositoryImpl(
+        context = context,
         localStorage = localStorage
     )
 
