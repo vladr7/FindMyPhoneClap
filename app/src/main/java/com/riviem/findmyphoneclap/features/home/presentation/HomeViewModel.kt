@@ -88,7 +88,9 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun startService(activity: Activity) {
         if(!hasMicrophonePermissionUseCase.execute()) {
-            settingsRepository.askForMicrophonePermission(activity = activity)
+            _state.update {
+                it.copy(shouldAskForMicrophonePermission = true)
+            }
             return
         }
         audioClassificationService.startService()
@@ -109,10 +111,17 @@ class HomeViewModel @Inject constructor(
             settingsRepository.askForBypassDoNotDisturbPermission()
         }
     }
+
+    fun resetShouldAskForMicrophonePermission() {
+        _state.update {
+            it.copy(shouldAskForMicrophonePermission = false)
+        }
+    }
 }
 
 data class HomeViewState(
     val sensitivity: Int = 0,
     val volume: Int = 0,
     val isServiceActivated: Boolean = false,
+    val shouldAskForMicrophonePermission: Boolean = false,
 )

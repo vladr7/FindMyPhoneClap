@@ -1,5 +1,13 @@
 package com.riviem.findmyphoneclap.features.home.presentation
 
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,9 +25,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.riviem.findmyphoneclap.MainActivity
+import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
+import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
 
 @Composable
 fun HomeRoute(
@@ -44,7 +56,13 @@ fun HomeRoute(
         },
         onBypassDoNotDisturbClick = {
             viewModel.onBypassDoNotDisturbClick()
-        }
+        },
+        shouldAskForMicrophonePermission = state.shouldAskForMicrophonePermission,
+        onMicrophonePermissionFlowDone = {
+            viewModel.resetShouldAskForMicrophonePermission()
+        },
+        activity = activity,
+        context = context
     )
 }
 
@@ -57,7 +75,11 @@ fun HomeScreen(
     isActive: Boolean,
     volume: Int,
     onVolumeChange: (Int) -> Unit,
-    onBypassDoNotDisturbClick: () -> Unit
+    onBypassDoNotDisturbClick: () -> Unit,
+    shouldAskForMicrophonePermission: Boolean,
+    onMicrophonePermissionFlowDone: () -> Unit,
+    activity: Activity,
+    context: Context
 ) {
     Column(
         modifier = Modifier
@@ -85,6 +107,58 @@ fun HomeScreen(
         BypassDoNotDisturbButton(
             onBypassDoNotDisturbClick = onBypassDoNotDisturbClick
         )
+        if (shouldAskForMicrophonePermission) {
+            MicrophonePermissionDialog(
+                activity = activity,
+                context = context,
+                onMicrophonePermissionDismissed = onMicrophonePermissionFlowDone,
+            )
+        }
+    }
+}
+
+@Composable
+fun MicrophonePermissionDialog(
+    context: Context,
+    activity: Activity,
+    onMicrophonePermissionDismissed: () -> Unit,
+) {
+    if (ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                activity,
+                Manifest.permission.RECORD_AUDIO
+            )
+        ) {
+            AlertDialog2Buttons(
+                title = "Microphone Permission required to use this app",
+                dismissText = "Cancel",
+                confirmText = "OK",
+                onDismissClick = onMicrophonePermissionDismissed,
+                onConfirmClick = {
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts(
+                        "package",
+                        activity.packageName,
+                        null
+                    )
+                    intent.data = uri
+                    activity.startActivity(intent)
+                    onMicrophonePermissionDismissed()
+                }
+            )
+        } else {
+            onMicrophonePermissionDismissed()
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                SettingsRepositoryImpl.MY_PERMISSIONS_REQUEST_RECORD_AUDIO
+            )
+        }
     }
 }
 
