@@ -37,10 +37,10 @@ class HomeViewModel @Inject constructor(
     init {
         initSensitivity()
         initVolume()
-        initService()
+        initServiceState()
     }
 
-    private fun initService() {
+    private fun initServiceState() {
         viewModelScope.launch {
             val isServiceActivated = isServiceRunningUseCase.execute()
             _state.update {
