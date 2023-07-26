@@ -1,11 +1,16 @@
 package com.riviem.findmyphoneclap.features.home.presentation
 
-import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
-import com.riviem.findmyphoneclap.core.data.service.clapdetecting.AudioClassificationService
+import com.riviem.findmyphoneclap.features.home.domain.usecase.AskForBypassDNDPermissionUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.GetSensitivityUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.GetVolumeUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.HasMicrophonePermissionUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.IsServiceRunningUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.SetSensitivityUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.SetVolumeUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.StartServiceUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.StopServiceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,9 +20,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val audioClassificationService: AudioClassificationService,
-    private val settingsRepository: SettingsRepository,
-    private val hasMicrophonePermissionUseCase: HasMicrophonePermissionUseCase
+    private val hasMicrophonePermissionUseCase: HasMicrophonePermissionUseCase,
+    private val askForBypassDNDPermissionUseCase: AskForBypassDNDPermissionUseCase,
+    private val isServiceRunningUseCase: IsServiceRunningUseCase,
+    private val getVolumeUseCase: GetVolumeUseCase,
+    private val getSensitivityUseCase: GetSensitivityUseCase,
+    private val setVolumeUseCase: SetVolumeUseCase,
+    private val setSensitivityUseCase: SetSensitivityUseCase,
+    private val startServiceUseCase: StartServiceUseCase,
+    private val stopServiceUseCase: StopServiceUseCase
 ): ViewModel() {
 
     private val _state = MutableStateFlow<HomeViewState>(HomeViewState())
@@ -31,7 +42,7 @@ class HomeViewModel @Inject constructor(
 
     private fun initService() {
         viewModelScope.launch {
-            val isServiceActivated = audioClassificationService.isServiceRunning()
+            val isServiceActivated = isServiceRunningUseCase.execute()
             _state.update {
                 it.copy(isServiceActivated = isServiceActivated)
             }
@@ -40,7 +51,7 @@ class HomeViewModel @Inject constructor(
 
     private fun initVolume() {
         viewModelScope.launch {
-            val volume = settingsRepository.getVolume()
+            val volume = getVolumeUseCase.execute()
             _state.update {
                 it.copy(volume = volume)
             }
@@ -49,7 +60,7 @@ class HomeViewModel @Inject constructor(
 
     private fun initSensitivity() {
         viewModelScope.launch {
-            val sensitivity = settingsRepository.getSensitivity()
+            val sensitivity = getSensitivityUseCase.execute()
             _state.update {
                 it.copy(sensitivity = sensitivity)
             }
@@ -58,7 +69,7 @@ class HomeViewModel @Inject constructor(
 
     fun onVolumeChange(newValue: Int) {
         viewModelScope.launch {
-            settingsRepository.setVolume(newValue)
+            setVolumeUseCase.execute(newValue)
         }
         _state.update {
             it.copy(volume = newValue)
@@ -67,40 +78,40 @@ class HomeViewModel @Inject constructor(
 
     fun onSensitivityChange(newValue: Int) {
         viewModelScope.launch {
-            settingsRepository.setSensitivity(newValue)
+            setSensitivityUseCase.execute(newValue)
         }
         _state.update {
             it.copy(sensitivity = newValue)
         }
     }
 
-    fun configureService(activity: Activity) {
+    fun configureService() {
         viewModelScope.launch {
-            val isServiceActivated = audioClassificationService.isServiceRunning()
+            val isServiceActivated = isServiceRunningUseCase.execute()
             if(isServiceActivated) {
                 stopService()
             } else {
-                startService(activity = activity)
+                startService()
             }
 
         }
     }
 
-    private suspend fun startService(activity: Activity) {
+    private suspend fun startService() {
         if(!hasMicrophonePermissionUseCase.execute()) {
             _state.update {
                 it.copy(shouldAskForMicrophonePermission = true)
             }
             return
         }
-        audioClassificationService.startService()
+        startServiceUseCase.execute()
         _state.update {
             it.copy(isServiceActivated = true)
         }
     }
 
-    private suspend fun stopService() {
-        audioClassificationService.stopService()
+    private fun stopService() {
+        stopServiceUseCase.execute()
         _state.update {
             it.copy(isServiceActivated = false)
         }
@@ -108,7 +119,7 @@ class HomeViewModel @Inject constructor(
 
     fun onBypassDoNotDisturbClick() {
         viewModelScope.launch {
-            settingsRepository.askForBypassDoNotDisturbPermission()
+            askForBypassDNDPermissionUseCase.execute()
         }
     }
 

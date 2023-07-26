@@ -47,7 +47,7 @@ fun HomeRoute(
             viewModel.onSensitivityChange(newValue)
         },
         onActivationClick = {
-            viewModel.configureService(activity = activity)
+            viewModel.configureService()
         },
         isActive = state.isServiceActivated,
         volume = state.volume,
