@@ -28,12 +28,15 @@ import org.tensorflow.lite.support.audio.TensorAudio
 import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
 import org.tensorflow.lite.task.audio.classifier.Classifications
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 @AndroidEntryPoint
-class AudioTFLite @Inject constructor(): Service() {
+class AudioTFLite @Inject constructor() : Service() {
     private lateinit var audioClassifier: AudioClassifier
     private lateinit var tensorAudio: TensorAudio
     private lateinit var audioRecord: AudioRecord
@@ -112,8 +115,16 @@ class AudioTFLite @Inject constructor(): Service() {
 
         val nrOfSecondsToListen: Long = Long.MAX_VALUE
         var secondsCounter = 0L
+        mediaPlayer.setOnErrorListener { mediaPlayer, i, i2 ->
+            settingsRepository.logToFile("Checking..: MediaPlayer: Error: $i, $i2 ---------------------------------")
+            false
+        }
         while (secondsCounter < nrOfSecondsToListen) {
             delay(1000L)
+            settingsRepository.logToFile("Seconds passed: $secondsCounter")
+            settingsRepository.logToFile("Checking..: AudioRecord: ${audioRecord.recordingState}")
+            settingsRepository.logToFile("Checking..: IsServiceRunning: ${isServiceRunning}")
+            settingsRepository.logToFile("Checking..: MediaPlayer: ${mediaPlayer}")
             Log.d(
                 "AudioClassification",
                 "Seconds passed: $secondsCounter"
@@ -124,19 +135,26 @@ class AudioTFLite @Inject constructor(): Service() {
             for (classification in listOfClassification) {
                 for (category in classification.categories) {
                     if (category.score > 0.1) {
+                        settingsRepository.logToFile(
+                            "Category: ${category.label}, Score: ${category.score}"
+                        )
                         Log.d(
                             "AudioClassification",
-                            "Category: ${category.label}, Score: ${category.score}")
+                            "Category: ${category.label}, Score: ${category.score}"
+                        )
                     }
                     if (shouldPlaySound(category)) {
+                        settingsRepository.logToFile("Playing sound")
                         playSound(songDuration)
                     }
                 }
             }
         }
         mediaPlayer.setOnCompletionListener { mp ->
+            settingsRepository.logToFile("Set On Completion Listener -> Media Player -> Releasing: ${audioRecord.recordingState}")
             mp.release()
         }
+        settingsRepository.logToFile("STOPPING AUDIO RECORD!!! AND SERVICE !!!!: ${audioRecord.recordingState}")
         audioRecord.stop()
         stopSelf()
     }
@@ -153,7 +171,7 @@ class AudioTFLite @Inject constructor(): Service() {
 
     private suspend fun playSound(songDuration: Int) {
         val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-        if(!shouldBypassDNDPermission(originalVolume)) {
+        if (!shouldBypassDNDPermission(originalVolume)) {
             return
         }
         val originalRingerMode = audioManager.ringerMode
@@ -184,10 +202,11 @@ class AudioTFLite @Inject constructor(): Service() {
     }
 
     private suspend fun shouldBypassDNDPermission(originalVolume: Int): Boolean {
-        return when(settingsRepository.hasBypassDoNotDisturbPermission()) {
+        return when (settingsRepository.hasBypassDoNotDisturbPermission()) {
             BypassDNDState.ENABLED -> {
                 true
             }
+
             else -> {
                 originalVolume != 0
             }
@@ -199,6 +218,7 @@ class AudioTFLite @Inject constructor(): Service() {
     }
 
     fun stopService() {
+        settingsRepository.logToFile("STOPPING SERVICE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         coroutineScope.cancel("Service stopped")
         isServiceRunning = false
         stopSelf()
@@ -206,10 +226,10 @@ class AudioTFLite @Inject constructor(): Service() {
             if (this::audioClassifier.isInitialized && !audioClassifier.isClosed) {
                 audioClassifier.close()
             }
-            if(this::audioRecord.isInitialized) {
+            if (this::audioRecord.isInitialized) {
                 audioRecord.release()
             }
-            if(this::mediaPlayer.isInitialized) {
+            if (this::mediaPlayer.isInitialized) {
                 mediaPlayer.release()
             }
         } catch (e: Exception) {

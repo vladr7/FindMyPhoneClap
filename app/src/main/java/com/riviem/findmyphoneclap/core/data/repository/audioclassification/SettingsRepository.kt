@@ -11,4 +11,5 @@ interface SettingsRepository {
     suspend fun hasBypassDoNotDisturbPermission(): BypassDNDState
     fun askForBypassDoNotDisturbPermission()
     suspend fun setByPassDoNotDisturbPermission(isEnabled: Boolean)
+    fun logToFile(message: String)
 }

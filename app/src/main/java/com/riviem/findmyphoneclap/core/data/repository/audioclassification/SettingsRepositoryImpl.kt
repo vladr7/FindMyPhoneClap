@@ -11,6 +11,9 @@ import com.riviem.findmyphoneclap.core.constants.Constants
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorageKeys
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
 
@@ -85,5 +88,13 @@ class SettingsRepositoryImpl @Inject constructor(
             LocalStorageKeys.BYPASS_DO_NOT_DISTURB_PERMISSION_ENABLED,
             isEnabled
         )
+    }
+
+    override fun logToFile(message: String) {
+        val timestamp = SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Date())
+        val logMessage = "$timestamp: $message"
+
+        val logFile = File(context.getExternalFilesDir(null), "log.txt")
+        logFile.appendText("$logMessage\n")
     }
 }
