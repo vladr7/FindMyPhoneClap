@@ -15,13 +15,13 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.riviem.findmyphoneclap.R
+import com.riviem.findmyphoneclap.core.data.models.ServiceSettings
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.audio.TensorAudio
@@ -39,6 +39,7 @@ class AudioTFLite @Inject constructor() : Service() {
     private lateinit var audioRecord: AudioRecord
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var audioManager: AudioManager
+    var serviceSettings: ServiceSettings = ServiceSettings()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val playSoundAfterCreatingMediaPlayerCoroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -177,8 +178,8 @@ class AudioTFLite @Inject constructor() : Service() {
         stopSelf()
     }
 
-    private suspend fun shouldPlaySound(category: Category): Boolean {
-        val userScore = convertSensitivityToScore(settingsRepository.getSensitivity())
+    private fun shouldPlaySound(category: Category): Boolean {
+        val userScore = convertSensitivityToScore(serviceSettings.sensitivity)
         return category.label == Labels.CLAPPING.stringValue &&
                 category.score > userScore
     }
@@ -196,7 +197,7 @@ class AudioTFLite @Inject constructor() : Service() {
     }
 
     private suspend fun playSound() {
-        val songDuration = settingsRepository.getSongDuration()
+        val songDuration = serviceSettings.songDuration
         val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         if (!shouldBypassDNDPermission(originalVolume)) {
             return
@@ -206,7 +207,7 @@ class AudioTFLite @Inject constructor() : Service() {
             try {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_MUSIC,
-                    convertVolumeToStreamVolume(settingsRepository.getVolume()),
+                    convertVolumeToStreamVolume(serviceSettings.volume),
                     0
                 )
                 audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
@@ -230,16 +231,11 @@ class AudioTFLite @Inject constructor() : Service() {
     }
 
 
-    private suspend fun shouldBypassDNDPermission(originalVolume: Int): Boolean {
-        return when (settingsRepository.hasBypassDoNotDisturbPermission()) {
-            BypassDNDState.ENABLED -> {
-                true
-            }
-
-            else -> {
-                originalVolume != 0
-            }
+    private fun shouldBypassDNDPermission(originalVolume: Int): Boolean {
+        if(serviceSettings.isBypassDNDPermissionEnabled) {
+            return true
         }
+        return originalVolume != 0
     }
 
     private fun convertVolumeToStreamVolume(volume: Int): Int {

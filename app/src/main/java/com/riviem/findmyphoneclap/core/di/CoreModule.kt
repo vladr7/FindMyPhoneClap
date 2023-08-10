@@ -41,7 +41,9 @@ object CoreModule {
     @Provides
     fun provideAudioClassificationService(
         @ApplicationContext context: Context,
+        settingsRepository: SettingsRepository
     ): AudioClassificationService = AudioClassificationServiceImpl(
         context = context,
+        settingsRepository = settingsRepository
     )
 }

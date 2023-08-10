@@ -81,7 +81,7 @@ class SettingsRepositoryImpl @Inject constructor(
         context.startActivity(intent)
     }
 
-    override suspend fun hasBypassDoNotDisturbPermission(): BypassDNDState {
+    override suspend fun getBypassDoNotDisturbPermissionState(): BypassDNDState {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (!notificationManager.isNotificationPolicyAccessGranted) {
@@ -95,6 +95,10 @@ class SettingsRepositoryImpl @Inject constructor(
             return BypassDNDState.DISABLED_FROM_LOCAL_STORAGE
         }
         return BypassDNDState.ENABLED
+    }
+
+    override suspend fun getBypassDoNotDisturbPermissionEnabled(): Boolean {
+        return getBypassDoNotDisturbPermissionState() == BypassDNDState.ENABLED
     }
 
     override suspend fun setByPassDoNotDisturbPermission(isEnabled: Boolean) {
