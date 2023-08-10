@@ -108,7 +108,6 @@ class AudioTFLite @Inject constructor() : Service() {
             this,
             R.raw.birdwhistle
         )
-        val songDuration = mediaPlayer.duration
         audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         val nrOfSecondsToListen: Long = Long.MAX_VALUE
@@ -119,7 +118,7 @@ class AudioTFLite @Inject constructor() : Service() {
             createMediaPlayer()
             playSoundAfterCreatingMediaPlayerCoroutineScope.launch {
                 settingsRepository.logToFile("Checking..: set on Error Listener MediaPlayer: Playing sound *********************************")
-                playSound(songDuration)
+                playSound()
                 this.cancel()
             }
             false
@@ -127,7 +126,7 @@ class AudioTFLite @Inject constructor() : Service() {
         var countNrOfSilences = 0
         while (secondsCounter < nrOfSecondsToListen) {
             delay(1000L)
-            if(countNrOfSilences > 10) {
+            if (countNrOfSilences > 10) {
                 settingsRepository.logToFile("Checking..: Resetting audio record")
                 audioRecord.stop()
                 audioRecord.release()
@@ -157,14 +156,14 @@ class AudioTFLite @Inject constructor() : Service() {
                             "Category: ${category.label}, Score: ${category.score}"
                         )
                     }
-                    if(category.label == Labels.SILENCE.stringValue) {
+                    if (category.label == Labels.SILENCE.stringValue) {
                         countNrOfSilences++
                     } else {
                         countNrOfSilences = 0
                     }
                     if (shouldPlaySound(category)) {
                         settingsRepository.logToFile("Playing sound")
-                        playSound(songDuration)
+                        playSound()
                     }
                 }
             }
@@ -196,7 +195,8 @@ class AudioTFLite @Inject constructor() : Service() {
         )
     }
 
-    private suspend fun playSound(songDuration: Int) {
+    private suspend fun playSound() {
+        val songDuration = settingsRepository.getSongDuration()
         val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         if (!shouldBypassDNDPermission(originalVolume)) {
             return
@@ -210,25 +210,25 @@ class AudioTFLite @Inject constructor() : Service() {
                     0
                 )
                 audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                mediaPlayer.isLooping = true
                 mediaPlayer.start()
 
+                delay(songDuration)
+
+                mediaPlayer.stop() // Stop playback
+                mediaPlayer.prepare() // Prepare the player for next time
             } finally {
-                coroutineScope {
-                    launch {
-                        delay(songDuration.toLong())
-                        audioManager.setStreamVolume(
-                            AudioManager.STREAM_MUSIC,
-                            originalVolume,
-                            0
-                        )
-                        audioManager.ringerMode = originalRingerMode
-                        settingsRepository.logToFile("Cancelling coroutine: Song finished @@@@@@@@@@@@")
-                        this@launch.cancel("Song finished")
-                    }
-                }
+                audioManager.setStreamVolume(
+                    AudioManager.STREAM_MUSIC,
+                    originalVolume,
+                    0
+                )
+                audioManager.ringerMode = originalRingerMode
+                settingsRepository.logToFile("Song finished @@@@@@@@@@@@")
             }
         }
     }
+
 
     private suspend fun shouldBypassDNDPermission(originalVolume: Int): Boolean {
         return when (settingsRepository.hasBypassDoNotDisturbPermission()) {

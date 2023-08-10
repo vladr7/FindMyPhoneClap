@@ -53,6 +53,10 @@ fun HomeRoute(
         onVolumeChange = { newValue ->
             viewModel.onVolumeChange(newValue)
         },
+        songDuration = state.songDuration,
+        onSongDurationChange = { newValue ->
+            viewModel.onSongDurationChange(newValue)
+        },
         onBypassDoNotDisturbClick = {
             viewModel.onBypassDoNotDisturbClick()
         },
@@ -75,6 +79,8 @@ fun HomeScreen(
     isServiceActive: Boolean,
     volume: Int,
     onVolumeChange: (Int) -> Unit,
+    songDuration: Int,
+    onSongDurationChange: (Int) -> Unit,
     onBypassDoNotDisturbClick: () -> Unit,
     isBypassDNDActive : Boolean,
     shouldAskForMicrophonePermission: Boolean,
@@ -104,6 +110,10 @@ fun HomeScreen(
         VolumeSlider(
             volume = volume,
             onVolumeChange = onVolumeChange
+        )
+        SongDurationSlider(
+            songDuration = songDuration,
+            onSongDurationChange = onSongDurationChange
         )
         BypassDoNotDisturbButton(
             onActivationClick = onBypassDoNotDisturbClick,
@@ -253,7 +263,7 @@ fun SensitivitySlider(
 ) {
     Column(
         modifier = Modifier
-            .padding(30.dp),
+            .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Sensitivity $sensitivity")
@@ -275,7 +285,7 @@ fun VolumeSlider(
 ) {
     Column(
         modifier = Modifier
-            .padding(30.dp),
+            .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Volume $volume")
@@ -286,6 +296,28 @@ fun VolumeSlider(
             },
             valueRange = 0f..100f,
             steps = 100
+        )
+    }
+}
+
+@Composable
+fun SongDurationSlider(
+    songDuration: Int,
+    onSongDurationChange: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Song Duration $songDuration seconds")
+        Slider(
+            value = songDuration.toFloat(),
+            onValueChange = { newValue ->
+                onSongDurationChange(newValue.toInt())
+            },
+            valueRange = 1f..10f,
+            steps = 9
         )
     }
 }

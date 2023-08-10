@@ -54,6 +54,20 @@ class SettingsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun setSongDuration(durationInMillis: Long) {
+        localStorage.putLong(
+            LocalStorageKeys.SONG_DURATION,
+            durationInMillis
+        )
+    }
+
+    override suspend fun getSongDuration(): Long {
+        return localStorage.getLong(
+            LocalStorageKeys.SONG_DURATION,
+            defaultValue = Constants.SONG_DURATION_DEFAULT_VALUE
+        )
+    }
+
     override fun hasMicrophonePermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,

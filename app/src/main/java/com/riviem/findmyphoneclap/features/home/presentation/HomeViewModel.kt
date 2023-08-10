@@ -5,12 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import com.riviem.findmyphoneclap.features.home.domain.usecase.AskForBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.GetSensitivityUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.GetSongDurationUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.GetVolumeUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.HasBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.HasMicrophonePermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.IsServiceRunningUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetSensitivityUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.SetSongDurationUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetVolumeUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.StartServiceUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.StopServiceUseCase
@@ -33,7 +35,9 @@ class HomeViewModel @Inject constructor(
     private val startServiceUseCase: StartServiceUseCase,
     private val stopServiceUseCase: StopServiceUseCase,
     private val hasBypassDNDPermissionUseCase: HasBypassDNDPermissionUseCase,
-    private val setBypassDNDPermissionUseCase: SetBypassDNDPermissionUseCase
+    private val setBypassDNDPermissionUseCase: SetBypassDNDPermissionUseCase,
+    private val setSongDurationUseCase: SetSongDurationUseCase,
+    private val getSongDurationUseCase: GetSongDurationUseCase
 ): ViewModel() {
 
     private val _state = MutableStateFlow<HomeViewState>(HomeViewState())
@@ -44,6 +48,16 @@ class HomeViewModel @Inject constructor(
         initVolume()
         initServiceState()
         initBypassDNDState()
+        initSongDuration()
+    }
+
+    private fun initSongDuration() {
+        viewModelScope.launch {
+            val songDuration = getSongDurationUseCase.execute()
+            _state.update {
+                it.copy(songDuration = songDuration)
+            }
+        }
     }
 
     private fun initBypassDNDState() {
@@ -105,6 +119,15 @@ class HomeViewModel @Inject constructor(
         }
         _state.update {
             it.copy(sensitivity = newValue)
+        }
+    }
+
+    fun onSongDurationChange(newValue: Int) {
+        viewModelScope.launch {
+            setSongDurationUseCase.execute(newValue)
+        }
+        _state.update {
+            it.copy(songDuration = newValue)
         }
     }
 
@@ -172,6 +195,7 @@ class HomeViewModel @Inject constructor(
 data class HomeViewState(
     val sensitivity: Int = 0,
     val volume: Int = 0,
+    val songDuration: Int = 0,
     val isServiceActivated: Boolean = false,
     val shouldAskForMicrophonePermission: Boolean = false,
     val isBypassDNDActive: Boolean = false
