@@ -116,6 +116,9 @@ fun HomeScreen(
                 onMicrophonePermissionDismissed = onMicrophonePermissionFlowDone,
             )
         }
+        RemoveUnusedAppPermissionButton(
+            activity = activity
+        )
     }
 }
 
@@ -161,6 +164,32 @@ fun MicrophonePermissionDialog(
                 SettingsRepositoryImpl.MY_PERMISSIONS_REQUEST_RECORD_AUDIO
             )
         }
+    }
+}
+
+@Composable
+fun RemoveUnusedAppPermissionButton(
+    activity: Activity
+) {
+    Button(
+        onClick = {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            val uri = Uri.fromParts("package", activity.packageName, null)
+            intent.data = uri
+            activity.startActivity(intent)
+        },
+
+        modifier = Modifier.padding(16.dp),
+        colors = ButtonDefaults.buttonColors(
+                Color.Green
+        ),
+    ) {
+        Text(
+            text = "Remove Unused App Permission",
+            color = Color.White,
+            style = TextStyle(fontWeight = FontWeight.Bold)
+        )
     }
 }
 

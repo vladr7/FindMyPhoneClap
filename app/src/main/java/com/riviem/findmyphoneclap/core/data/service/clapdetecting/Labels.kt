@@ -5,4 +5,5 @@ enum class Labels(val stringValue: String) {
     HANDS("Hands"),
     WHISTLING("Whistling"),
     FINGER_SNAPPING("Finger snapping"),
+    SILENCE("Silence"),
 }

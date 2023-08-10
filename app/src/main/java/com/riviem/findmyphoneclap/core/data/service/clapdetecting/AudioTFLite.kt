@@ -28,9 +28,6 @@ import org.tensorflow.lite.support.audio.TensorAudio
 import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
 import org.tensorflow.lite.task.audio.classifier.Classifications
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,6 +40,7 @@ class AudioTFLite @Inject constructor() : Service() {
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var audioManager: AudioManager
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val playSoundAfterCreatingMediaPlayerCoroutineScope = CoroutineScope(Dispatchers.IO)
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
@@ -116,11 +114,27 @@ class AudioTFLite @Inject constructor() : Service() {
         val nrOfSecondsToListen: Long = Long.MAX_VALUE
         var secondsCounter = 0L
         mediaPlayer.setOnErrorListener { mediaPlayer, i, i2 ->
-            settingsRepository.logToFile("Checking..: MediaPlayer: Error: $i, $i2 ---------------------------------")
+            settingsRepository.logToFile("Checking..: set on Error Listener MediaPlayer: Error: $i, $i2 ---------------------------------")
+            mediaPlayer.release()
+            createMediaPlayer()
+            playSoundAfterCreatingMediaPlayerCoroutineScope.launch {
+                settingsRepository.logToFile("Checking..: set on Error Listener MediaPlayer: Playing sound *********************************")
+                playSound(songDuration)
+                this.cancel()
+            }
             false
         }
+        var countNrOfSilences = 0
         while (secondsCounter < nrOfSecondsToListen) {
             delay(1000L)
+            if(countNrOfSilences > 10) {
+                settingsRepository.logToFile("Checking..: Resetting audio record")
+                audioRecord.stop()
+                audioRecord.release()
+                audioRecord = audioClassifier.createAudioRecord()
+                audioRecord.startRecording()
+                countNrOfSilences = 0
+            }
             settingsRepository.logToFile("Seconds passed: $secondsCounter")
             settingsRepository.logToFile("Checking..: AudioRecord: ${audioRecord.recordingState}")
             settingsRepository.logToFile("Checking..: IsServiceRunning: ${isServiceRunning}")
@@ -142,6 +156,11 @@ class AudioTFLite @Inject constructor() : Service() {
                             "AudioClassification",
                             "Category: ${category.label}, Score: ${category.score}"
                         )
+                    }
+                    if(category.label == Labels.SILENCE.stringValue) {
+                        countNrOfSilences++
+                    } else {
+                        countNrOfSilences = 0
                     }
                     if (shouldPlaySound(category)) {
                         settingsRepository.logToFile("Playing sound")
@@ -167,6 +186,14 @@ class AudioTFLite @Inject constructor() : Service() {
 
     private fun convertSensitivityToScore(sensitivity: Int): Double {
         return 1 - (sensitivity.toDouble() / 100)
+    }
+
+    private fun createMediaPlayer() {
+        settingsRepository.logToFile("Creating Media Player %%%%%%%%%%%%%%%%%%")
+        mediaPlayer = MediaPlayer.create(
+            this,
+            R.raw.birdwhistle
+        )
     }
 
     private suspend fun playSound(songDuration: Int) {
@@ -195,6 +222,8 @@ class AudioTFLite @Inject constructor() : Service() {
                             0
                         )
                         audioManager.ringerMode = originalRingerMode
+                        settingsRepository.logToFile("Cancelling coroutine: Song finished @@@@@@@@@@@@")
+                        this@launch.cancel("Song finished")
                     }
                 }
             }
