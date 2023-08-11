@@ -6,7 +6,10 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 class AudioClassificationServiceImpl @Inject constructor(
@@ -32,7 +35,17 @@ class AudioClassificationServiceImpl @Inject constructor(
         val intent = Intent(context, AudioTFLite::class.java)
         context.startForegroundService(intent)
         context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        delay(1000) // todo remove this delay?
+        withTimeout(5000) {
+            while (!bound) {
+                delay(100)
+            }
+        }
+        if(bound) {
+            onServiceBound()
+        }
+    }
+
+    private suspend fun onServiceBound() {
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(
             sensitivity = settingsRepository.getSensitivity(),
             volume = settingsRepository.getVolume(),

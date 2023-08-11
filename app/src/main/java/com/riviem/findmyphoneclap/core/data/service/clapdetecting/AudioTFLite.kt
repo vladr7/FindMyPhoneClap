@@ -193,7 +193,7 @@ class AudioTFLite @Inject constructor() : Service() {
                 delay(songDuration)
 
                 mediaPlayer.stop()
-                mediaPlayer.prepare() 
+                mediaPlayer.prepare()
             } finally {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_MUSIC,
