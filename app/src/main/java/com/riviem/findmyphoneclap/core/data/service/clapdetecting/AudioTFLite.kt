@@ -122,26 +122,13 @@ class AudioTFLite @Inject constructor() : Service() {
             }
             false
         }
-        var countNrOfSilences = 0
         while (secondsCounter < nrOfSecondsToListen) {
             delay(1000L)
-            if (countNrOfSilences > 10) {
-                audioRecord.stop()
-                audioRecord.release()
-                audioRecord = audioClassifier.createAudioRecord()
-                audioRecord.startRecording()
-                countNrOfSilences = 0
-            }
             secondsCounter++
             tensorAudio.load(audioRecord)
             val listOfClassification: List<Classifications> = audioClassifier.classify(tensorAudio)
             for (classification in listOfClassification) {
                 for (category in classification.categories) {
-                    if (category.label == Labels.SILENCE.stringValue) {
-                        countNrOfSilences++
-                    } else {
-                        countNrOfSilences = 0
-                    }
                     if (shouldPlaySound(category)) {
                         playSound()
                     }
@@ -173,7 +160,6 @@ class AudioTFLite @Inject constructor() : Service() {
     }
 
     private suspend fun playSound() {
-        val songDuration = serviceSettings.songDuration
         val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         if (!shouldBypassDNDPermission(originalVolume)) {
             return
@@ -190,7 +176,7 @@ class AudioTFLite @Inject constructor() : Service() {
                 mediaPlayer.isLooping = true
                 mediaPlayer.start()
 
-                delay(songDuration)
+                delay(serviceSettings.songDuration)
 
                 mediaPlayer.stop()
                 mediaPlayer.prepare()
