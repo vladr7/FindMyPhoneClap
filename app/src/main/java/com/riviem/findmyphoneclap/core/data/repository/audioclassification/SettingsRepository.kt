@@ -7,10 +7,11 @@ interface SettingsRepository {
     suspend fun getSensitivity(): Int
     suspend fun setVolume(volume: Int)
     suspend fun getVolume(): Int
-    suspend fun setSongDuration(duration: Long)
+    suspend fun setSongDuration(durationInMillis: Long)
     suspend fun getSongDuration(): Long
     fun hasMicrophonePermission(): Boolean
-    suspend fun hasBypassDoNotDisturbPermission(): BypassDNDState
+    suspend fun getBypassDoNotDisturbPermissionState(): BypassDNDState
+    suspend fun getBypassDoNotDisturbPermissionEnabled(): Boolean
     fun askForBypassDoNotDisturbPermission()
     suspend fun setByPassDoNotDisturbPermission(isEnabled: Boolean)
     fun logToFile(message: String)

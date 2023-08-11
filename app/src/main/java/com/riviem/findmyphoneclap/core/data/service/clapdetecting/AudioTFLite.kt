@@ -15,13 +15,13 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.riviem.findmyphoneclap.R
+import com.riviem.findmyphoneclap.core.data.models.ServiceSettings
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.audio.TensorAudio
@@ -39,6 +39,7 @@ class AudioTFLite @Inject constructor() : Service() {
     private lateinit var audioRecord: AudioRecord
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var audioManager: AudioManager
+    var serviceSettings: ServiceSettings = ServiceSettings()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val playSoundAfterCreatingMediaPlayerCoroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -113,72 +114,36 @@ class AudioTFLite @Inject constructor() : Service() {
         val nrOfSecondsToListen: Long = Long.MAX_VALUE
         var secondsCounter = 0L
         mediaPlayer.setOnErrorListener { mediaPlayer, i, i2 ->
-            settingsRepository.logToFile("Checking..: set on Error Listener MediaPlayer: Error: $i, $i2 ---------------------------------")
             mediaPlayer.release()
             createMediaPlayer()
             playSoundAfterCreatingMediaPlayerCoroutineScope.launch {
-                settingsRepository.logToFile("Checking..: set on Error Listener MediaPlayer: Playing sound *********************************")
                 playSound()
                 this.cancel()
             }
             false
         }
-        var countNrOfSilences = 0
         while (secondsCounter < nrOfSecondsToListen) {
             delay(1000L)
-            if (countNrOfSilences > 10) {
-                settingsRepository.logToFile("Checking..: Resetting audio record")
-                audioRecord.stop()
-                audioRecord.release()
-                audioRecord = audioClassifier.createAudioRecord()
-                audioRecord.startRecording()
-                countNrOfSilences = 0
-            }
-            settingsRepository.logToFile("Seconds passed: $secondsCounter")
-            settingsRepository.logToFile("Checking..: AudioRecord: ${audioRecord.recordingState}")
-            settingsRepository.logToFile("Checking..: IsServiceRunning: ${isServiceRunning}")
-            settingsRepository.logToFile("Checking..: MediaPlayer: ${mediaPlayer}")
-            Log.d(
-                "AudioClassification",
-                "Seconds passed: $secondsCounter"
-            )
             secondsCounter++
             tensorAudio.load(audioRecord)
             val listOfClassification: List<Classifications> = audioClassifier.classify(tensorAudio)
             for (classification in listOfClassification) {
                 for (category in classification.categories) {
-                    if (category.score > 0.1) {
-                        settingsRepository.logToFile(
-                            "Category: ${category.label}, Score: ${category.score}"
-                        )
-                        Log.d(
-                            "AudioClassification",
-                            "Category: ${category.label}, Score: ${category.score}"
-                        )
-                    }
-                    if (category.label == Labels.SILENCE.stringValue) {
-                        countNrOfSilences++
-                    } else {
-                        countNrOfSilences = 0
-                    }
                     if (shouldPlaySound(category)) {
-                        settingsRepository.logToFile("Playing sound")
                         playSound()
                     }
                 }
             }
         }
         mediaPlayer.setOnCompletionListener { mp ->
-            settingsRepository.logToFile("Set On Completion Listener -> Media Player -> Releasing: ${audioRecord.recordingState}")
             mp.release()
         }
-        settingsRepository.logToFile("STOPPING AUDIO RECORD!!! AND SERVICE !!!!: ${audioRecord.recordingState}")
         audioRecord.stop()
         stopSelf()
     }
 
-    private suspend fun shouldPlaySound(category: Category): Boolean {
-        val userScore = convertSensitivityToScore(settingsRepository.getSensitivity())
+    private fun shouldPlaySound(category: Category): Boolean {
+        val userScore = convertSensitivityToScore(serviceSettings.sensitivity)
         return category.label == Labels.CLAPPING.stringValue &&
                 category.score > userScore
     }
@@ -188,7 +153,6 @@ class AudioTFLite @Inject constructor() : Service() {
     }
 
     private fun createMediaPlayer() {
-        settingsRepository.logToFile("Creating Media Player %%%%%%%%%%%%%%%%%%")
         mediaPlayer = MediaPlayer.create(
             this,
             R.raw.birdwhistle
@@ -196,7 +160,6 @@ class AudioTFLite @Inject constructor() : Service() {
     }
 
     private suspend fun playSound() {
-        val songDuration = settingsRepository.getSongDuration()
         val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         if (!shouldBypassDNDPermission(originalVolume)) {
             return
@@ -206,17 +169,17 @@ class AudioTFLite @Inject constructor() : Service() {
             try {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_MUSIC,
-                    convertVolumeToStreamVolume(settingsRepository.getVolume()),
+                    convertVolumeToStreamVolume(serviceSettings.volume),
                     0
                 )
                 audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
                 mediaPlayer.isLooping = true
                 mediaPlayer.start()
 
-                delay(songDuration)
+                delay(serviceSettings.songDuration)
 
-                mediaPlayer.stop() // Stop playback
-                mediaPlayer.prepare() // Prepare the player for next time
+                mediaPlayer.stop()
+                mediaPlayer.prepare()
             } finally {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_MUSIC,
@@ -224,22 +187,16 @@ class AudioTFLite @Inject constructor() : Service() {
                     0
                 )
                 audioManager.ringerMode = originalRingerMode
-                settingsRepository.logToFile("Song finished @@@@@@@@@@@@")
             }
         }
     }
 
 
-    private suspend fun shouldBypassDNDPermission(originalVolume: Int): Boolean {
-        return when (settingsRepository.hasBypassDoNotDisturbPermission()) {
-            BypassDNDState.ENABLED -> {
-                true
-            }
-
-            else -> {
-                originalVolume != 0
-            }
+    private fun shouldBypassDNDPermission(originalVolume: Int): Boolean {
+        if(serviceSettings.isBypassDNDPermissionEnabled) {
+            return true
         }
+        return originalVolume != 0
     }
 
     private fun convertVolumeToStreamVolume(volume: Int): Int {
@@ -247,7 +204,6 @@ class AudioTFLite @Inject constructor() : Service() {
     }
 
     fun stopService() {
-        settingsRepository.logToFile("STOPPING SERVICE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         coroutineScope.cancel("Service stopped")
         isServiceRunning = false
         stopSelf()

@@ -8,6 +8,6 @@ class HasBypassDNDPermissionUseCase @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) {
     suspend fun execute(): BypassDNDState {
-        return settingsRepository.hasBypassDoNotDisturbPermission()
+        return settingsRepository.getBypassDoNotDisturbPermissionState()
     }
 }

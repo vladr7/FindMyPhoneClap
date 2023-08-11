@@ -5,4 +5,8 @@ interface AudioClassificationService {
     suspend fun startService()
     fun stopService()
     fun isServiceRunning(): Boolean
+    fun setSensitivity(sensitivity: Int)
+    fun setVolume(volume: Int)
+    fun setSongDuration(songDurationMillis: Long)
+    fun setBypassDNDPermissionEnabled(isEnabled: Boolean)
 }
