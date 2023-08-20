@@ -9,4 +9,5 @@ interface AudioClassificationService {
     fun setVolume(volume: Int)
     fun setSongDuration(songDurationMillis: Long)
     fun setBypassDNDPermissionEnabled(isEnabled: Boolean)
+    suspend fun pauseServiceForDuration(durationMillis: Long)
 }

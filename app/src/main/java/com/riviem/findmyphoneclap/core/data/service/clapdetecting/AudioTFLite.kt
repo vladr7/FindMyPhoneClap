@@ -40,7 +40,7 @@ class AudioTFLite @Inject constructor() : Service() {
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var audioManager: AudioManager
     var serviceSettings: ServiceSettings = ServiceSettings()
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private var coroutineScope = CoroutineScope(Dispatchers.IO)
     private val playSoundAfterCreatingMediaPlayerCoroutineScope = CoroutineScope(Dispatchers.IO)
 
     @Inject
@@ -225,4 +225,14 @@ class AudioTFLite @Inject constructor() : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return binder
     }
+
+    fun pauseServiceForDuration(duration: Long) {
+        coroutineScope.cancel("Service paused")
+        coroutineScope = CoroutineScope(Dispatchers.Main)
+        coroutineScope.launch {
+            delay(duration)
+            startRecording()
+        }
+    }
+
 }

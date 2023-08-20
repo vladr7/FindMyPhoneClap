@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.riviem.findmyphoneclap.MainActivity
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
+import org.checkerframework.checker.units.qual.s
 
 @Composable
 fun HomeRoute(
@@ -66,7 +67,11 @@ fun HomeRoute(
             viewModel.resetShouldAskForMicrophonePermission()
         },
         activity = activity,
-        context = context
+        context = context,
+        pauseDuration = state.pauseDuration,
+        onPauseDurationChange = { newValue ->
+            viewModel.onPauseDurationChange(newValue)
+        }
     )
 }
 
@@ -87,6 +92,8 @@ fun HomeScreen(
     onMicrophonePermissionFlowDone: () -> Unit,
     activity: Activity,
     context: Context,
+    pauseDuration: Int,
+    onPauseDurationChange: (Int) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -128,6 +135,35 @@ fun HomeScreen(
         }
         RemoveUnusedAppPermissionButton(
             activity = activity
+        )
+        PauseForDuration(duration = pauseDuration , onDurationChange = onPauseDurationChange)
+    }
+}
+
+@Composable
+fun PauseForDuration(
+    duration: Int,
+    onDurationChange: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(top = 24.dp)
+    ) {
+        Text(
+            text = "Pause for $duration seconds",
+            fontSize = 20.sp,
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+        )
+        Slider(
+            value = duration.toFloat(),
+            onValueChange = { newValue ->
+                onDurationChange(newValue.toInt())
+            },
+            valueRange = 1f..10f,
+            steps = 9,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
         )
     }
 }

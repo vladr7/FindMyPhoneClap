@@ -10,6 +10,7 @@ import com.riviem.findmyphoneclap.features.home.domain.usecase.GetVolumeUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.HasBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.HasMicrophonePermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.IsServiceRunningUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.PauseServiceForDurationUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetSensitivityUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetSongDurationUseCase
@@ -37,7 +38,8 @@ class HomeViewModel @Inject constructor(
     private val hasBypassDNDPermissionUseCase: HasBypassDNDPermissionUseCase,
     private val setBypassDNDPermissionUseCase: SetBypassDNDPermissionUseCase,
     private val setSongDurationUseCase: SetSongDurationUseCase,
-    private val getSongDurationUseCase: GetSongDurationUseCase
+    private val getSongDurationUseCase: GetSongDurationUseCase,
+    private val pauseServiceForDurationUseCase: PauseServiceForDurationUseCase
 ): ViewModel() {
 
     private val _state = MutableStateFlow<HomeViewState>(HomeViewState())
@@ -190,6 +192,15 @@ class HomeViewModel @Inject constructor(
             it.copy(shouldAskForMicrophonePermission = false)
         }
     }
+
+    fun onPauseDurationChange(newValue: Int) {
+        _state.update {
+            it.copy(pauseDuration = newValue)
+        }
+        viewModelScope.launch {
+            pauseServiceForDurationUseCase.execute(newValue)
+        }
+    }
 }
 
 data class HomeViewState(
@@ -198,5 +209,6 @@ data class HomeViewState(
     val songDuration: Int = 0,
     val isServiceActivated: Boolean = false,
     val shouldAskForMicrophonePermission: Boolean = false,
-    val isBypassDNDActive: Boolean = false
+    val isBypassDNDActive: Boolean = false,
+    val pauseDuration: Int = 0
 )

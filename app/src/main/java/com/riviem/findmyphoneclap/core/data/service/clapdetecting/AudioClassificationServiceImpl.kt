@@ -81,4 +81,8 @@ class AudioClassificationServiceImpl @Inject constructor(
     override fun setBypassDNDPermissionEnabled(isEnabled: Boolean) {
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(isBypassDNDPermissionEnabled = isEnabled)
     }
+
+    override suspend fun pauseServiceForDuration(durationMillis: Long) {
+        audioTFLite.pauseServiceForDuration(durationMillis)
+    }
 }
