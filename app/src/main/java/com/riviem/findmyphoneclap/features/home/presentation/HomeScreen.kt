@@ -7,18 +7,33 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -31,7 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.riviem.findmyphoneclap.MainActivity
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
-import org.checkerframework.checker.units.qual.s
+import com.riviem.findmyphoneclap.ui.theme.ActivateButtonColor
 
 @Composable
 fun HomeRoute(
@@ -87,7 +102,7 @@ fun HomeScreen(
     songDuration: Int,
     onSongDurationChange: (Int) -> Unit,
     onBypassDoNotDisturbClick: () -> Unit,
-    isBypassDNDActive : Boolean,
+    isBypassDNDActive: Boolean,
     shouldAskForMicrophonePermission: Boolean,
     onMicrophonePermissionFlowDone: () -> Unit,
     activity: Activity,
@@ -100,45 +115,87 @@ fun HomeScreen(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "HomeScreen",
-            fontSize = 30.sp,
-            modifier = Modifier
-                .padding(top = 24.dp)
-        )
-        ActivationButton(
-            onActivationClick = onActivationClick,
-            isActive = isServiceActive
-        )
-        SensitivitySlider(
-            sensitivity = sensitivity,
-            onSensitivityChange = onSensitivityChange
-        )
-        VolumeSlider(
-            volume = volume,
-            onVolumeChange = onVolumeChange
-        )
-        SongDurationSlider(
-            songDuration = songDuration,
-            onSongDurationChange = onSongDurationChange
-        )
-        BypassDoNotDisturbButton(
-            onActivationClick = onBypassDoNotDisturbClick,
-            isActive = isBypassDNDActive
-        )
-        if (shouldAskForMicrophonePermission) {
-            MicrophonePermissionDialog(
-                activity = activity,
-                context = context,
-                onMicrophonePermissionDismissed = onMicrophonePermissionFlowDone,
-            )
-        }
-        RemoveUnusedAppPermissionButton(
-            activity = activity
-        )
-        PauseForDuration(duration = pauseDuration , onDurationChange = onPauseDurationChange)
+        ActivateServiceButton()
+//        ActivationButton(
+//            onActivationClick = onActivationClick,
+//            isActive = isServiceActive
+//        )
+//        SensitivitySlider(
+//            sensitivity = sensitivity,
+//            onSensitivityChange = onSensitivityChange
+//        )
+//        VolumeSlider(
+//            volume = volume,
+//            onVolumeChange = onVolumeChange
+//        )
+//        SongDurationSlider(
+//            songDuration = songDuration,
+//            onSongDurationChange = onSongDurationChange
+//        )
+//        BypassDoNotDisturbButton(
+//            onActivationClick = onBypassDoNotDisturbClick,
+//            isActive = isBypassDNDActive
+//        )
+//        if (shouldAskForMicrophonePermission) {
+//            MicrophonePermissionDialog(
+//                activity = activity,
+//                context = context,
+//                onMicrophonePermissionDismissed = onMicrophonePermissionFlowDone,
+//            )
+//        }
+//        RemoveUnusedAppPermissionButton(
+//            activity = activity
+//        )
+//        PauseForDuration(duration = pauseDuration, onDurationChange = onPauseDurationChange)
     }
 }
+
+@Composable
+fun ActivateServiceButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Box(
+        modifier = modifier
+            .padding(top = 30.dp)
+            .size(200.dp)
+    ) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val gradient = Brush.radialGradient(
+                colors = listOf(
+                    ActivateButtonColor.copy(alpha = 0.5f),
+                    Color.Transparent
+                ),
+                center = Offset(size.width / 2, size.height / 2),
+                radius = size.width / 2
+            )
+            drawCircle(
+                brush = gradient,
+                center = Offset(size.width / 2, size.height / 2),
+                radius = size.width / 2
+            )
+        }
+
+        Button(
+            onClick = onClick,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(100.dp),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = ActivateButtonColor,
+                contentColor = Color.White
+            ),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+        ) {
+            Icon(
+                Icons.Default.PlayArrow, contentDescription = "Activate Service",
+                modifier = modifier.size(40.dp)
+            )
+        }
+    }
+}
+
 
 @Composable
 fun PauseForDuration(
@@ -228,7 +285,7 @@ fun RemoveUnusedAppPermissionButton(
 
         modifier = Modifier.padding(16.dp),
         colors = ButtonDefaults.buttonColors(
-                Color.Green
+            Color.Green
         ),
     ) {
         Text(
@@ -265,6 +322,7 @@ fun BypassDoNotDisturbButton(
         )
     }
 }
+
 @Composable
 fun ActivationButton(
     onActivationClick: () -> Unit,
