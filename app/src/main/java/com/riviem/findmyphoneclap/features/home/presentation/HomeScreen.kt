@@ -9,8 +9,9 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,19 +22,22 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +51,7 @@ import com.riviem.findmyphoneclap.MainActivity
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
 import com.riviem.findmyphoneclap.ui.theme.ActivateButtonColor
+import kotlin.math.atan2
 
 @Composable
 fun HomeRoute(
@@ -115,7 +120,7 @@ fun HomeScreen(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ActivateServiceButton()
+        ActivateServiceContent()
 //        ActivationButton(
 //            onActivationClick = onActivationClick,
 //            isActive = isServiceActive
@@ -151,50 +156,154 @@ fun HomeScreen(
 }
 
 @Composable
-fun ActivateServiceButton(
+fun ActivateServiceContent(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    var redSliderValue by remember { mutableFloatStateOf(0.5f) } // 0 to 1
+    var blueSliderValue by remember { mutableFloatStateOf(0.5f) } // 0 to 1
+
     Box(
         modifier = modifier
             .padding(top = 30.dp)
             .size(200.dp)
     ) {
-        Canvas(modifier = Modifier.matchParentSize()) {
-            val gradient = Brush.radialGradient(
-                colors = listOf(
-                    ActivateButtonColor.copy(alpha = 0.5f),
-                    Color.Transparent
-                ),
-                center = Offset(size.width / 2, size.height / 2),
-                radius = size.width / 2
-            )
-            drawCircle(
-                brush = gradient,
-                center = Offset(size.width / 2, size.height / 2),
-                radius = size.width / 2
-            )
-        }
-
-        Button(
-            onClick = onClick,
+        Canvas(
             modifier = Modifier
-                .align(Alignment.Center)
-                .size(100.dp),
-            shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ActivateButtonColor,
-                contentColor = Color.White
-            ),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                .matchParentSize()
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, pan, _, _ ->
+                        val width = size.width
+                        val height = size.height
+                        val touchPoint = Offset(pan.x * width, pan.y * height)
+                        val center = Offset((width / 2).toFloat(), (height / 2).toFloat())
+                        val angle = atan2(touchPoint.y - center.y, touchPoint.x - center.x)
+
+                        // Determine which slider is closer to the touch point
+                        if (angle in 0.0..180.0) {
+                            blueSliderValue = angle / 180f
+                        } else if (angle in -180.0..0.0) {
+                            redSliderValue = -angle / 180f
+                        }
+                    }
+                }
         ) {
-            Icon(
-                Icons.Default.PlayArrow, contentDescription = "Activate Service",
-                modifier = modifier.size(40.dp)
-            )
+            volumeAndSensitivitySliders(redSliderValue, blueSliderValue)
         }
+        StartServiceButton(
+            modifier = modifier,
+            onClick = onClick
+        )
     }
 }
+
+private fun DrawScope.volumeAndSensitivitySliders(
+    redSliderValue: Float,
+    blueSliderValue: Float,
+    sliderWidth: Float = 15.dp.toPx()
+) {
+    val gradient = Brush.radialGradient(
+        colors = listOf(
+            ActivateButtonColor.copy(alpha = 0.5f),
+            Color.Transparent
+        ),
+        center = Offset(size.width / 2, size.height / 2),
+        radius = size.width / 2
+    )
+    drawCircle(
+        brush = gradient,
+        center = Offset(size.width / 2, size.height / 2),
+        radius = size.width / 2
+    )
+
+    drawArc(
+        color = Color.Red,
+        startAngle = 180f,
+        sweepAngle = 180f * redSliderValue,
+        useCenter = false,
+        size = size,
+        topLeft = Offset(0f, 0f),
+        style = Stroke(width = sliderWidth, cap = StrokeCap.Round)
+    )
+
+    drawArc(
+        color = Color.Blue,
+        startAngle = 0f,
+        sweepAngle = -180f * blueSliderValue,
+        useCenter = false,
+        size = size,
+        topLeft = Offset(0f, 0f),
+        style = Stroke(width = sliderWidth, cap = StrokeCap.Round)
+    )
+}
+
+@Composable
+private fun BoxScope.StartServiceButton(onClick: () -> Unit, modifier: Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.Companion
+            .align(Alignment.Center)
+            .size(100.dp),
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ActivateButtonColor,
+            contentColor = Color.White
+        ),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+    ) {
+        Icon(
+            Icons.Default.PlayArrow, contentDescription = "Activate Service",
+            modifier = modifier.size(40.dp)
+        )
+    }
+}
+
+
+//@Composable
+//fun ActivateServiceButton(
+//    modifier: Modifier = Modifier,
+//    onClick: () -> Unit = {}
+//) {
+//    Box(
+//        modifier = modifier
+//            .padding(top = 30.dp)
+//            .size(200.dp)
+//    ) {
+//        Canvas(modifier = Modifier.matchParentSize()) {
+//            val gradient = Brush.radialGradient(
+//                colors = listOf(
+//                    ActivateButtonColor.copy(alpha = 0.5f),
+//                    Color.Transparent
+//                ),
+//                center = Offset(size.width / 2, size.height / 2),
+//                radius = size.width / 2
+//            )
+//            drawCircle(
+//                brush = gradient,
+//                center = Offset(size.width / 2, size.height / 2),
+//                radius = size.width / 2
+//            )
+//        }
+//
+//        Button(
+//            onClick = onClick,
+//            modifier = Modifier
+//                .align(Alignment.Center)
+//                .size(100.dp),
+//            shape = CircleShape,
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = ActivateButtonColor,
+//                contentColor = Color.White
+//            ),
+//            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+//        ) {
+//            Icon(
+//                Icons.Default.PlayArrow, contentDescription = "Activate Service",
+//                modifier = modifier.size(40.dp)
+//            )
+//        }
+//    }
+//}
 
 
 @Composable
