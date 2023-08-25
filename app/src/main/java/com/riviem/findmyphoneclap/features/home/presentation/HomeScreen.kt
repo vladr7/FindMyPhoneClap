@@ -163,24 +163,22 @@ fun HomeScreen(
 fun ActivateServiceContent(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    maxSliderValue: Float = 0.45f,
 ) {
-    var redSliderValue by remember { mutableFloatStateOf(maxSliderValue) } // 0 to 1
-    var blueSliderValue by remember { mutableFloatStateOf(maxSliderValue) } // 0 to 1
+    var redSliderValue by remember { mutableFloatStateOf(1f) } // 0 to 1
+    var blueSliderValue by remember { mutableFloatStateOf(1f) } // 0 to 1
 
     Box(
         modifier = modifier
-            .padding(top = 30.dp)
+            .padding(top = 100.dp)
             .size(200.dp)
     ) {
         Canvas(
             modifier = Modifier
-                .clickable { }
                 .matchParentSize()
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { startOffset ->
-                            // Logica pentru a determina dacă utilizatorul a început să tragă sliderul roșu sau albastru
+
                         },
                         onDrag = { change, dragAmount ->
                             val width = size.width
@@ -192,14 +190,12 @@ fun ActivateServiceContent(
                                 touchPoint.x - center.x
                             ) * (180.0 / PI).toFloat()
 
-                            // Determine which slider is closer to the touch point
                             if (angle in 90.0..180.0) {
                                 val newRedValue = 1f - (angle - 90f) / 90f
-                                redSliderValue =
-                                    newRedValue.coerceIn(0f, maxSliderValue)
+                                redSliderValue = newRedValue
                             } else if (angle in 0.0..90.0) {
-                                val newBlueValue = angle.toFloat() / 90f
-                                blueSliderValue = newBlueValue.coerceIn(0f, maxSliderValue)
+                                val newBlueValue = angle / 90f
+                                blueSliderValue = newBlueValue
                             }
                         },
 
@@ -222,7 +218,8 @@ fun ActivateServiceContent(
 private fun DrawScope.volumeAndSensitivitySliders(
     redSliderValue: Float,
     blueSliderValue: Float,
-    sliderWidth: Float = 15.dp.toPx()
+    sliderWidth: Float = 15.dp.toPx(),
+    sliderAngle: Float = 75f,
 ) {
     val gradient = Brush.radialGradient(
         colors = listOf(
@@ -241,7 +238,7 @@ private fun DrawScope.volumeAndSensitivitySliders(
     drawArc(
         color = Color.Red,
         startAngle = 180f,
-        sweepAngle = 180f * redSliderValue,
+        sweepAngle = sliderAngle * redSliderValue,
         useCenter = false,
         size = size,
         topLeft = Offset(0f, 0f),
@@ -251,7 +248,7 @@ private fun DrawScope.volumeAndSensitivitySliders(
     drawArc(
         color = Color.Blue,
         startAngle = 0f,
-        sweepAngle = -180f * blueSliderValue,
+        sweepAngle = -sliderAngle * blueSliderValue,
         useCenter = false,
         size = size,
         topLeft = Offset(0f, 0f),
