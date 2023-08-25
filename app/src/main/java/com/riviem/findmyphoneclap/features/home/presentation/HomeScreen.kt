@@ -9,6 +9,8 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -27,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,6 +54,7 @@ import com.riviem.findmyphoneclap.MainActivity
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
 import com.riviem.findmyphoneclap.ui.theme.ActivateButtonColor
+import kotlin.math.PI
 import kotlin.math.atan2
 
 @Composable
@@ -160,8 +164,8 @@ fun ActivateServiceContent(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    var redSliderValue by remember { mutableFloatStateOf(0.5f) } // 0 to 1
-    var blueSliderValue by remember { mutableFloatStateOf(0.5f) } // 0 to 1
+    var redSliderValue by remember { mutableStateOf(0.5f) } // 0 to 1
+    var blueSliderValue by remember { mutableStateOf(0.5f) } // 0 to 1
 
     Box(
         modifier = modifier
@@ -170,22 +174,38 @@ fun ActivateServiceContent(
     ) {
         Canvas(
             modifier = Modifier
+                .clickable { }
                 .matchParentSize()
                 .pointerInput(Unit) {
-                    detectTransformGestures { _, pan, _, _ ->
-                        val width = size.width
-                        val height = size.height
-                        val touchPoint = Offset(pan.x * width, pan.y * height)
-                        val center = Offset((width / 2).toFloat(), (height / 2).toFloat())
-                        val angle = atan2(touchPoint.y - center.y, touchPoint.x - center.x)
+                    detectDragGestures(
+                        onDragStart = { startOffset ->
+                            // Logica pentru a determina dacă utilizatorul a început să tragă sliderul roșu sau albastru
+                        },
+                        onDrag = { change, dragAmount ->
+                            val width = size.width
+                            val height = size.height
+                            val touchPoint = change.position
+                            val center = Offset((width / 2).toFloat(), (height / 2).toFloat())
+                            val angle = atan2(
+                                center.y - touchPoint.y,
+                                touchPoint.x - center.x
+                            ) * (180.0 / PI).toFloat()
 
-                        // Determine which slider is closer to the touch point
-                        if (angle in 0.0..180.0) {
-                            blueSliderValue = angle / 180f
-                        } else if (angle in -180.0..0.0) {
-                            redSliderValue = -angle / 180f
+                            // Determine which slider is closer to the touch point
+                            if (angle in 90.0..180.0) {
+                                val newRedValue = 1f - (angle - 90f) / 90f
+                                redSliderValue =
+                                    newRedValue.coerceIn(0f, 0.5f) // 0.5f is the max value for the slider
+                            } else if (angle in 0.0..90.0) {
+                                val newBlueValue = angle.toFloat() / 90f
+                                blueSliderValue = newBlueValue.coerceIn(0f, 0.5f) // 0.5f is the max value for the slider
+                            }
+                        },
+
+                        onDragEnd = {
+                            // Logica pentru a finaliza acțiunea de "drag"
                         }
-                    }
+                    )
                 }
         ) {
             volumeAndSensitivitySliders(redSliderValue, blueSliderValue)
@@ -196,6 +216,7 @@ fun ActivateServiceContent(
         )
     }
 }
+
 
 private fun DrawScope.volumeAndSensitivitySliders(
     redSliderValue: Float,
