@@ -162,10 +162,11 @@ fun HomeScreen(
 @Composable
 fun ActivateServiceContent(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    maxSliderValue: Float = 0.45f,
 ) {
-    var redSliderValue by remember { mutableStateOf(0.5f) } // 0 to 1
-    var blueSliderValue by remember { mutableStateOf(0.5f) } // 0 to 1
+    var redSliderValue by remember { mutableFloatStateOf(maxSliderValue) } // 0 to 1
+    var blueSliderValue by remember { mutableFloatStateOf(maxSliderValue) } // 0 to 1
 
     Box(
         modifier = modifier
@@ -195,10 +196,10 @@ fun ActivateServiceContent(
                             if (angle in 90.0..180.0) {
                                 val newRedValue = 1f - (angle - 90f) / 90f
                                 redSliderValue =
-                                    newRedValue.coerceIn(0f, 0.5f) // 0.5f is the max value for the slider
+                                    newRedValue.coerceIn(0f, maxSliderValue)
                             } else if (angle in 0.0..90.0) {
                                 val newBlueValue = angle.toFloat() / 90f
-                                blueSliderValue = newBlueValue.coerceIn(0f, 0.5f) // 0.5f is the max value for the slider
+                                blueSliderValue = newBlueValue.coerceIn(0f, maxSliderValue)
                             }
                         },
 
