@@ -9,9 +9,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -164,8 +162,8 @@ fun ActivateServiceContent(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    var redSliderValue by remember { mutableFloatStateOf(1f) } // 0 to 1
-    var blueSliderValue by remember { mutableFloatStateOf(1f) } // 0 to 1
+    var redSliderValue by remember { mutableFloatStateOf(1f) }
+    var blueSliderValue by remember { mutableFloatStateOf(1f) }
     var draggingRedSlider by remember { mutableStateOf(false) }
     var draggingBlueSlider by remember { mutableStateOf(false) }
 
@@ -227,7 +225,7 @@ fun ActivateServiceContent(
 private fun DrawScope.volumeAndSensitivitySliders(
     redSliderValue: Float,
     blueSliderValue: Float,
-    sliderWidth: Float = 15.dp.toPx(),
+    sliderWidth: Float = 20.dp.toPx(),
     sliderAngle: Float = 75f,
 ) {
     val gradient = Brush.radialGradient(
@@ -245,7 +243,11 @@ private fun DrawScope.volumeAndSensitivitySliders(
     )
 
     drawArc(
-        color = Color.Red,
+        brush = Brush.verticalGradient(
+            colors = listOf(Color.Red, Color.White),
+            startY = 0f,
+            endY = size.height
+        ),
         startAngle = 180f,
         sweepAngle = sliderAngle * redSliderValue,
         useCenter = false,
@@ -255,7 +257,11 @@ private fun DrawScope.volumeAndSensitivitySliders(
     )
 
     drawArc(
-        color = Color.Blue,
+        brush = Brush.verticalGradient(
+            colors = listOf(Color.Blue, Color.White),
+            startY = 0f,
+            endY = size.height
+        ),
         startAngle = 0f,
         sweepAngle = -sliderAngle * blueSliderValue,
         useCenter = false,
