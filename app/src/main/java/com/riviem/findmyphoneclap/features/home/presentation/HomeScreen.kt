@@ -166,6 +166,8 @@ fun ActivateServiceContent(
 ) {
     var redSliderValue by remember { mutableFloatStateOf(1f) } // 0 to 1
     var blueSliderValue by remember { mutableFloatStateOf(1f) } // 0 to 1
+    var draggingRedSlider by remember { mutableStateOf(false) }
+    var draggingBlueSlider by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -191,16 +193,23 @@ fun ActivateServiceContent(
                             ) * (180.0 / PI).toFloat()
 
                             if (angle in 90.0..180.0) {
-                                val newRedValue = 1f - (angle - 90f) / 90f
-                                redSliderValue = newRedValue
+                                if (!draggingBlueSlider) {
+                                    val newRedValue = 1f - (angle - 90f) / 90f
+                                    redSliderValue = newRedValue
+                                    draggingRedSlider = true
+                                }
                             } else if (angle in 0.0..90.0) {
-                                val newBlueValue = angle / 90f
-                                blueSliderValue = newBlueValue
+                                if(!draggingRedSlider) {
+                                    val newBlueValue = angle / 90f
+                                    blueSliderValue = newBlueValue
+                                    draggingBlueSlider = true
+                                }
                             }
                         },
 
                         onDragEnd = {
-                            // Logica pentru a finaliza acțiunea de "drag"
+                            draggingBlueSlider = false
+                            draggingRedSlider = false
                         }
                     )
                 }
