@@ -9,6 +9,8 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -39,9 +43,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -52,6 +60,8 @@ import com.riviem.findmyphoneclap.MainActivity
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
 import com.riviem.findmyphoneclap.ui.theme.ActivateButtonColor
+import com.riviem.findmyphoneclap.ui.theme.BackgroundBottomColor
+import com.riviem.findmyphoneclap.ui.theme.BackgroundTopColor
 import kotlin.math.PI
 import kotlin.math.atan2
 
@@ -117,43 +127,15 @@ fun HomeScreen(
     pauseDuration: Int,
     onPauseDurationChange: (Int) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ActivateServiceContent()
-//        ActivationButton(
-//            onActivationClick = onActivationClick,
-//            isActive = isServiceActive
-//        )
-//        SensitivitySlider(
-//            sensitivity = sensitivity,
-//            onSensitivityChange = onSensitivityChange
-//        )
-//        VolumeSlider(
-//            volume = volume,
-//            onVolumeChange = onVolumeChange
-//        )
-//        SongDurationSlider(
-//            songDuration = songDuration,
-//            onSongDurationChange = onSongDurationChange
-//        )
-//        BypassDoNotDisturbButton(
-//            onActivationClick = onBypassDoNotDisturbClick,
-//            isActive = isBypassDNDActive
-//        )
-//        if (shouldAskForMicrophonePermission) {
-//            MicrophonePermissionDialog(
-//                activity = activity,
-//                context = context,
-//                onMicrophonePermissionDismissed = onMicrophonePermissionFlowDone,
-//            )
-//        }
-//        RemoveUnusedAppPermissionButton(
-//            activity = activity
-//        )
-//        PauseForDuration(duration = pauseDuration, onDurationChange = onPauseDurationChange)
+    GradientBackgroundScreen {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ActivateServiceContent(
+            )
+        }
     }
 }
 
@@ -197,7 +179,7 @@ fun ActivateServiceContent(
                                     draggingRedSlider = true
                                 }
                             } else if (angle in 0.0..90.0) {
-                                if(!draggingRedSlider) {
+                                if (!draggingRedSlider) {
                                     val newBlueValue = angle / 90f
                                     blueSliderValue = newBlueValue
                                     draggingBlueSlider = true
@@ -292,6 +274,26 @@ private fun BoxScope.StartServiceButton(onClick: () -> Unit, modifier: Modifier)
     }
 }
 
+
+@Composable
+fun GradientBackgroundScreen(
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        BackgroundTopColor,
+                        BackgroundBottomColor
+                    )
+                )
+            )
+    ) {
+        content()
+    }
+}
 
 //@Composable
 //fun ActivateServiceButton(
@@ -558,3 +560,4 @@ fun SongDurationSlider(
         )
     }
 }
+
