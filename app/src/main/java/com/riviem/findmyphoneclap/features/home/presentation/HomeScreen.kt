@@ -5,12 +5,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Path
+import android.graphics.Typeface
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -19,12 +21,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,21 +37,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -57,6 +57,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.riviem.findmyphoneclap.MainActivity
+import com.riviem.findmyphoneclap.R
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
 import com.riviem.findmyphoneclap.ui.theme.ActivateButtonColor
@@ -127,16 +128,38 @@ fun HomeScreen(
     pauseDuration: Int,
     onPauseDurationChange: (Int) -> Unit,
 ) {
+
+
     GradientBackgroundScreen {
         Column(
             modifier = Modifier
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            GreetingText(
+                modifier = Modifier
+                    .padding(top = 30.dp)
+            )
             ActivateServiceContent(
+                modifier = Modifier
+                    .padding(top = 70.dp),
             )
         }
     }
+}
+
+@Composable
+fun GreetingText(
+    modifier: Modifier = Modifier
+) {
+    BasicText(
+        text = stringResource(R.string.welcome),
+        style = TextStyle(
+            fontSize = 30.sp,
+            color = Color.White
+        ),
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -146,12 +169,13 @@ fun ActivateServiceContent(
 ) {
     var redSliderValue by remember { mutableFloatStateOf(1f) }
     var blueSliderValue by remember { mutableFloatStateOf(1f) }
+    val animatedRedColor by animateColorAsState(targetValue = if (redSliderValue > 0.9f) Color.Red else Color(0xFFff006e))
+    val animatedBlueColor by animateColorAsState(targetValue = if (blueSliderValue > 0.9f) Color(0xFF0077b6) else Color.Blue)
     var draggingRedSlider by remember { mutableStateOf(false) }
     var draggingBlueSlider by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
-            .padding(top = 100.dp)
             .size(200.dp)
     ) {
         Canvas(
@@ -194,20 +218,26 @@ fun ActivateServiceContent(
                     )
                 }
         ) {
-            volumeAndSensitivitySliders(redSliderValue, blueSliderValue)
+            volumeAndSensitivitySliders(
+                redSliderValue = redSliderValue,
+                blueSliderValue = blueSliderValue,
+                animatedRedColor = animatedRedColor,
+                animatedBlueColor = animatedBlueColor
+            )
         }
         StartServiceButton(
-            modifier = modifier,
+            modifier = Modifier,
             onClick = onClick
         )
     }
 }
 
-
 private fun DrawScope.volumeAndSensitivitySliders(
     redSliderValue: Float,
     blueSliderValue: Float,
-    sliderWidth: Float = 20.dp.toPx(),
+    animatedRedColor: Color,
+    animatedBlueColor: Color,
+    sliderWidth: Float = 25.dp.toPx(),
     sliderAngle: Float = 75f,
 ) {
     val gradient = Brush.radialGradient(
@@ -226,7 +256,7 @@ private fun DrawScope.volumeAndSensitivitySliders(
 
     drawArc(
         brush = Brush.verticalGradient(
-            colors = listOf(Color.Red, Color.White),
+            colors = listOf(animatedRedColor, Color.White),
             startY = 0f,
             endY = size.height
         ),
@@ -240,7 +270,7 @@ private fun DrawScope.volumeAndSensitivitySliders(
 
     drawArc(
         brush = Brush.verticalGradient(
-            colors = listOf(Color.Blue, Color.White),
+            colors = listOf(animatedBlueColor, Color.White),
             startY = 0f,
             endY = size.height
         ),
@@ -251,7 +281,64 @@ private fun DrawScope.volumeAndSensitivitySliders(
         topLeft = Offset(0f, 0f),
         style = Stroke(width = sliderWidth, cap = StrokeCap.Round)
     )
+
+    textOnSliders(sliderAngle, redSliderValue, blueSliderValue)
 }
+
+private fun DrawScope.textOnSliders(
+    sliderAngle: Float,
+    redSliderValue: Float,
+    blueSliderValue: Float
+) {
+    val baseTextSize = 56f
+    val minTextSize = baseTextSize * 0.4f
+    val redTextSize = minTextSize + (baseTextSize - minTextSize) * redSliderValue
+    val blueTextSize = minTextSize + (baseTextSize - minTextSize) * blueSliderValue
+
+    val paintRed = android.graphics.Paint().apply {
+        isAntiAlias = true
+        textSize = redTextSize
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = android.graphics.Paint.Align.CENTER
+        color = android.graphics.Color.WHITE
+    }
+
+    val paintBlue = android.graphics.Paint().apply {
+        isAntiAlias = true
+        textSize = blueTextSize
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = android.graphics.Paint.Align.CENTER
+        color = android.graphics.Color.WHITE
+    }
+
+    drawIntoCanvas { canvas ->
+        val pathRed = Path().apply {
+            addArc(
+                15f,
+                15f,
+                size.width,
+                size.height,
+                180f,
+                sliderAngle * redSliderValue
+            )
+        }
+        canvas.nativeCanvas.drawTextOnPath("Volume", pathRed, 0f, 0f, paintRed)
+
+        val pathBlue = Path().apply {
+            addArc(
+                20f,
+                20f,
+                size.width,
+                size.height,
+                360f - (sliderAngle * blueSliderValue),
+                sliderAngle * blueSliderValue
+            )
+        }
+        canvas.nativeCanvas.drawTextOnPath("Sensitivity", pathBlue, 0f, 0f, paintBlue)
+    }
+}
+
+
 
 @Composable
 private fun BoxScope.StartServiceButton(onClick: () -> Unit, modifier: Modifier) {

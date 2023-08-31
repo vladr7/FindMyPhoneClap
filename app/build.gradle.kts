@@ -53,7 +53,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    aaptOptions{
+    aaptOptions {
         noCompress += "tflite"
     }
 }
@@ -86,6 +86,10 @@ dependencies {
     implementation(libs.bundles.accompanist)
     implementation(libs.bundles.appupdate)
     implementation(libs.tensorflow.lite.audio)
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.4.3")
+    implementation("com.google.android.gms:play-services-basement:17.6.0")
+
+
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.junit)
