@@ -10,6 +10,8 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -24,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -60,9 +63,12 @@ import com.riviem.findmyphoneclap.MainActivity
 import com.riviem.findmyphoneclap.R
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
+import com.riviem.findmyphoneclap.core.presentation.animations.PulsatingCircle
+import com.riviem.findmyphoneclap.core.presentation.animations.bounceClick
 import com.riviem.findmyphoneclap.ui.theme.ActivateButtonColor
 import com.riviem.findmyphoneclap.ui.theme.BackgroundBottomColor
 import com.riviem.findmyphoneclap.ui.theme.BackgroundTopColor
+import com.riviem.findmyphoneclap.ui.theme.DeactivateButtonColor
 import kotlin.math.PI
 import kotlin.math.atan2
 
@@ -143,6 +149,8 @@ fun HomeScreen(
             ActivateServiceContent(
                 modifier = Modifier
                     .padding(top = 70.dp),
+                onClick = onActivationClick,
+                isServiceActive = isServiceActive
             )
         }
     }
@@ -165,12 +173,21 @@ fun GreetingText(
 @Composable
 fun ActivateServiceContent(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+    onClick: () -> Unit,
+    isServiceActive: Boolean
 ) {
     var redSliderValue by remember { mutableFloatStateOf(1f) }
     var blueSliderValue by remember { mutableFloatStateOf(1f) }
-    val animatedRedColor by animateColorAsState(targetValue = if (redSliderValue > 0.9f) Color.Red else Color(0xFFff006e))
-    val animatedBlueColor by animateColorAsState(targetValue = if (blueSliderValue > 0.9f) Color(0xFF0077b6) else Color.Blue)
+    val animatedRedColor by animateColorAsState(
+        targetValue = if (redSliderValue > 0.9f) Color.Red else Color(
+            0xFFff006e
+        ), label = ""
+    )
+    val animatedBlueColor by animateColorAsState(
+        targetValue = if (blueSliderValue > 0.9f) Color(
+            0xFF0077b6
+        ) else Color.Blue, label = ""
+    )
     var draggingRedSlider by remember { mutableStateOf(false) }
     var draggingBlueSlider by remember { mutableStateOf(false) }
 
@@ -218,42 +235,59 @@ fun ActivateServiceContent(
                     )
                 }
         ) {
-            volumeAndSensitivitySliders(
+            volumeSensitivitySlidersAndGlowing(
                 redSliderValue = redSliderValue,
                 blueSliderValue = blueSliderValue,
                 animatedRedColor = animatedRedColor,
-                animatedBlueColor = animatedBlueColor
+                animatedBlueColor = animatedBlueColor,
+                isServiceActive = isServiceActive
+            )
+        }
+        if(isServiceActive) {
+            PulsatingCircle(
+                modifier = Modifier,
+                scale = 400f,
             )
         }
         StartServiceButton(
             modifier = Modifier,
-            onClick = onClick
+            onClick = onClick,
+            isServiceActive = isServiceActive
         )
     }
 }
 
-private fun DrawScope.volumeAndSensitivitySliders(
+private fun DrawScope.volumeSensitivitySlidersAndGlowing(
     redSliderValue: Float,
     blueSliderValue: Float,
     animatedRedColor: Color,
     animatedBlueColor: Color,
     sliderWidth: Float = 25.dp.toPx(),
     sliderAngle: Float = 75f,
+    isServiceActive: Boolean,
 ) {
-    val gradient = Brush.radialGradient(
-        colors = listOf(
-            ActivateButtonColor.copy(alpha = 0.5f),
-            Color.Transparent
-        ),
-        center = Offset(size.width / 2, size.height / 2),
-        radius = size.width / 2
+    glowingEffectActivateButton(
+        isServiceActive = isServiceActive,
     )
-    drawCircle(
-        brush = gradient,
-        center = Offset(size.width / 2, size.height / 2),
-        radius = size.width / 2
+    sliders(
+        animatedRedColor,
+        sliderAngle,
+        redSliderValue,
+        sliderWidth,
+        animatedBlueColor,
+        blueSliderValue
     )
+    textOnSliders(sliderAngle, redSliderValue, blueSliderValue)
+}
 
+private fun DrawScope.sliders(
+    animatedRedColor: Color,
+    sliderAngle: Float,
+    redSliderValue: Float,
+    sliderWidth: Float,
+    animatedBlueColor: Color,
+    blueSliderValue: Float
+) {
     drawArc(
         brush = Brush.verticalGradient(
             colors = listOf(animatedRedColor, Color.White),
@@ -281,8 +315,27 @@ private fun DrawScope.volumeAndSensitivitySliders(
         topLeft = Offset(0f, 0f),
         style = Stroke(width = sliderWidth, cap = StrokeCap.Round)
     )
+}
 
-    textOnSliders(sliderAngle, redSliderValue, blueSliderValue)
+private fun DrawScope.glowingEffectActivateButton(
+    isServiceActive: Boolean
+) {
+
+
+    val color = if (!isServiceActive) ActivateButtonColor else DeactivateButtonColor
+    val gradient = Brush.radialGradient(
+        colors = listOf(
+            color.copy(alpha = 0.5f),
+            Color.Transparent
+        ),
+        center = Offset(size.width / 2, size.height / 2),
+        radius = size.width / 2
+    )
+    drawCircle(
+        brush = gradient,
+        center = Offset(size.width / 2, size.height / 2),
+        radius = size.width / 2
+    )
 }
 
 private fun DrawScope.textOnSliders(
@@ -339,23 +392,35 @@ private fun DrawScope.textOnSliders(
 }
 
 
-
 @Composable
-private fun BoxScope.StartServiceButton(onClick: () -> Unit, modifier: Modifier) {
+private fun BoxScope.StartServiceButton(
+    onClick: () -> Unit, modifier: Modifier,
+    isServiceActive: Boolean
+) {
+    val animatedColor = animateColorAsState(
+        targetValue = if(!isServiceActive) ActivateButtonColor else Color.Red,
+        animationSpec = tween(
+            durationMillis = 400,
+            easing = FastOutSlowInEasing
+        ), label = ""
+    )
+
     Button(
         onClick = onClick,
         modifier = Modifier.Companion
             .align(Alignment.Center)
+            .bounceClick()
             .size(100.dp),
         shape = CircleShape,
         colors = ButtonDefaults.buttonColors(
-            containerColor = ActivateButtonColor,
+            containerColor = animatedColor.value,
             contentColor = Color.White
         ),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
     ) {
         Icon(
-            Icons.Default.PlayArrow, contentDescription = "Activate Service",
+            imageVector = if(!isServiceActive) Icons.Default.PlayArrow else Icons.Default.Stop,
+            contentDescription = "Activate Service",
             modifier = modifier.size(40.dp)
         )
     }
