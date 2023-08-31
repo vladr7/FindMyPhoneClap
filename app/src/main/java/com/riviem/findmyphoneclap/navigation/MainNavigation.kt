@@ -12,10 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.riviem.findmyphoneclap.ui.theme.BackgroundBottomColor
 
 @Composable
 fun MainNavigation(
@@ -29,8 +31,8 @@ fun MainNavigation(
             NavigationBar(
                 modifier = Modifier
                     .height(106.dp),
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary,
+                containerColor = BackgroundBottomColor,
+                contentColor = Color.White,
             ) {
                 items.forEach { destination ->
                     val selected =
@@ -43,7 +45,7 @@ fun MainNavigation(
                                 Icon(
                                     imageVector = destination.selectedIcon,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSecondary,
+                                    tint = Color.White,
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
