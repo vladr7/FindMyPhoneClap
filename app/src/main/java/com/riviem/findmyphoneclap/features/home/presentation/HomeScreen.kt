@@ -9,9 +9,19 @@ import android.graphics.Path
 import android.graphics.Typeface
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -55,6 +65,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -176,8 +187,37 @@ fun ActivateServiceContent(
     onClick: () -> Unit,
     isServiceActive: Boolean
 ) {
+    Box(
+        modifier = modifier
+            .size(200.dp)
+    ) {
+        SlidersAndGlowing(
+            isServiceActive
+        )
+        if (isServiceActive) {
+            PulsatingCircle(
+                modifier = Modifier,
+                scale = 400f,
+            )
+        }
+        StartServiceButton(
+            modifier = Modifier,
+            onClick = onClick,
+            isServiceActive = isServiceActive
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.SlidersAndGlowing(
+    isServiceActive: Boolean
+) {
+    var draggingRedSlider by remember { mutableStateOf(false) }
+    var draggingBlueSlider by remember { mutableStateOf(false) }
     var redSliderValue by remember { mutableFloatStateOf(1f) }
     var blueSliderValue by remember { mutableFloatStateOf(1f) }
+    var isVisible by remember { mutableStateOf(true) }
+    isVisible = isServiceActive
     val animatedRedColor by animateColorAsState(
         targetValue = if (redSliderValue > 0.9f) Color.Red else Color(
             0xFFff006e
@@ -188,15 +228,16 @@ fun ActivateServiceContent(
             0xFF0077b6
         ) else Color.Blue, label = ""
     )
-    var draggingRedSlider by remember { mutableStateOf(false) }
-    var draggingBlueSlider by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = modifier
-            .size(200.dp)
+    AnimatedVisibility(
+        modifier = Modifier
+            .size(200.dp),
+        visible = isVisible,
+        enter = scaleIn(),
+        exit = scaleOut()
     ) {
         Canvas(
-            modifier = Modifier
+            modifier = Modifier.Companion
                 .matchParentSize()
                 .pointerInput(Unit) {
                     detectDragGestures(
@@ -243,17 +284,6 @@ fun ActivateServiceContent(
                 isServiceActive = isServiceActive
             )
         }
-        if(isServiceActive) {
-            PulsatingCircle(
-                modifier = Modifier,
-                scale = 400f,
-            )
-        }
-        StartServiceButton(
-            modifier = Modifier,
-            onClick = onClick,
-            isServiceActive = isServiceActive
-        )
     }
 }
 
@@ -398,7 +428,7 @@ private fun BoxScope.StartServiceButton(
     isServiceActive: Boolean
 ) {
     val animatedColor = animateColorAsState(
-        targetValue = if(!isServiceActive) ActivateButtonColor else Color.Red,
+        targetValue = if (!isServiceActive) ActivateButtonColor else Color.Red,
         animationSpec = tween(
             durationMillis = 400,
             easing = FastOutSlowInEasing
@@ -419,7 +449,7 @@ private fun BoxScope.StartServiceButton(
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
     ) {
         Icon(
-            imageVector = if(!isServiceActive) Icons.Default.PlayArrow else Icons.Default.Stop,
+            imageVector = if (!isServiceActive) Icons.Default.PlayArrow else Icons.Default.Stop,
             contentDescription = "Activate Service",
             modifier = modifier.size(40.dp)
         )
