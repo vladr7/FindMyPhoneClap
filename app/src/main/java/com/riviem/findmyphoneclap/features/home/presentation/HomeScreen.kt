@@ -270,7 +270,6 @@ private fun BoxScope.Sliders(
 
     AnimatedVisibility(
         modifier = Modifier
-            .clickable{}
             .size(boxSize),
         visible = isServiceActive,
         enter = scaleIn(),
@@ -297,13 +296,23 @@ private fun BoxScope.Sliders(
                             if (angle in 90.0..180.0) {
                                 if (!draggingBlueSlider) {
                                     val newRedValue = 1f - (angle - 90f) / 90f
-                                    onVolumeChange((newRedValue * 100).toInt())
+                                    onVolumeChange(
+                                        maxOf(
+                                            10,
+                                            (newRedValue * 100).toInt()
+                                        )
+                                    )
                                     draggingRedSlider = true
                                 }
                             } else if (angle in 0.0..90.0) {
                                 if (!draggingRedSlider) {
                                     val newBlueValue = angle / 90f
-                                    onSensitivityChange((newBlueValue * 100).toInt())
+                                    onSensitivityChange(
+                                        maxOf(
+                                            10,
+                                            (newBlueValue * 100).toInt()
+                                        )
+                                    )
                                     draggingBlueSlider = true
                                 }
                             }
@@ -396,12 +405,14 @@ private fun DrawScope.textValuesOnTheSideOfSliders(
     drawIntoCanvas { canvas ->
         canvas.nativeCanvas.drawText(
             "${
-                roundUpToEven((redSliderValue * 100).toInt())
+                if (redSliderValue > 0.97f) "100" else
+                    roundUpToEven((redSliderValue * 100).toInt())
             }", redX, redY, paintRed
         )
         canvas.nativeCanvas.drawText(
             "${
-                roundUpToEven((blueSliderValue * 100).toInt())
+                if (blueSliderValue > 0.97f) "100" else
+                    roundUpToEven((blueSliderValue * 100).toInt())
             }", blueX, blueY, paintBlue
         )
     }
