@@ -11,8 +11,6 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
@@ -69,7 +67,6 @@ import com.riviem.findmyphoneclap.R
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl
 import com.riviem.findmyphoneclap.core.presentation.AlertDialog2Buttons
 import com.riviem.findmyphoneclap.core.presentation.animations.PulsatingCircle
-import com.riviem.findmyphoneclap.core.presentation.animations.bounceClick
 import com.riviem.findmyphoneclap.ui.theme.ActivateButtonColor
 import com.riviem.findmyphoneclap.ui.theme.BackgroundBottomColor
 import com.riviem.findmyphoneclap.ui.theme.BackgroundTopColor
@@ -124,10 +121,10 @@ fun HomeRoute(
 fun HomeScreen(
     sensitivity: Int,
     onSensitivityChange: (Int) -> Unit,
-    onActivationClick: () -> Unit,
-    isServiceActive: Boolean,
     volume: Int,
     onVolumeChange: (Int) -> Unit,
+    onActivationClick: () -> Unit,
+    isServiceActive: Boolean,
     songDuration: Int,
     onSongDurationChange: (Int) -> Unit,
     onBypassDoNotDisturbClick: () -> Unit,
@@ -154,7 +151,11 @@ fun HomeScreen(
             ActivateServiceContent(
                 modifier = Modifier,
                 onClick = onActivationClick,
-                isServiceActive = isServiceActive
+                isServiceActive = isServiceActive,
+                volume = volume,
+                onVolumeChange = onVolumeChange,
+                sensitivity = sensitivity,
+                onSensitivityChange = onSensitivityChange,
             )
             Spacer(
                 modifier = Modifier.weight(1f)
@@ -182,14 +183,22 @@ fun GreetingText(
 fun ActivateServiceContent(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    isServiceActive: Boolean
+    isServiceActive: Boolean,
+    volume: Int,
+    onVolumeChange: (Int) -> Unit,
+    sensitivity: Int,
+    onSensitivityChange: (Int) -> Unit
 ) {
     Box(
         modifier = modifier
             .size(200.dp)
     ) {
         Sliders(
-            isServiceActive
+            isServiceActive = isServiceActive,
+            volume = volume,
+            onVolumeChange = onVolumeChange,
+            sensitivity = sensitivity,
+            onSensitivityChange = onSensitivityChange
         )
         if (isServiceActive) {
             PulsatingCircle(
@@ -231,12 +240,16 @@ private fun BoxScope.GlowStartServiceButton(isServiceActive: Boolean) {
 
 @Composable
 private fun BoxScope.Sliders(
-    isServiceActive: Boolean
+    isServiceActive: Boolean,
+    sensitivity: Int,
+    onSensitivityChange: (Int) -> Unit,
+    volume: Int,
+    onVolumeChange: (Int) -> Unit,
 ) {
     var draggingRedSlider by remember { mutableStateOf(false) }
     var draggingBlueSlider by remember { mutableStateOf(false) }
-    var redSliderValue by remember { mutableFloatStateOf(1f) }
-    var blueSliderValue by remember { mutableFloatStateOf(1f) }
+    val redSliderValue = maxOf(0.1f, volume / 100f)
+    val blueSliderValue = maxOf(0.1f, sensitivity / 100f)
     val animatedRedColor by animateColorAsState(
         targetValue = if (redSliderValue > 0.9f) Color.Red else Color(
             0xFFff006e
@@ -276,13 +289,13 @@ private fun BoxScope.Sliders(
                             if (angle in 90.0..180.0) {
                                 if (!draggingBlueSlider) {
                                     val newRedValue = 1f - (angle - 90f) / 90f
-                                    redSliderValue = newRedValue
+                                    onVolumeChange((newRedValue * 100).toInt())
                                     draggingRedSlider = true
                                 }
                             } else if (angle in 0.0..90.0) {
                                 if (!draggingRedSlider) {
                                     val newBlueValue = angle / 90f
-                                    blueSliderValue = newBlueValue
+                                    onSensitivityChange((newBlueValue * 100).toInt())
                                     draggingBlueSlider = true
                                 }
                             }
@@ -435,7 +448,7 @@ private fun BoxScope.StartServiceButton(
             Color.White
         ),
 
-    )
+        )
 
     Box(
         contentAlignment = Alignment.Center,
@@ -461,7 +474,6 @@ private fun BoxScope.StartServiceButton(
             )
         }
     }
-
 
 
 }

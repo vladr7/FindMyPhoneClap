@@ -91,6 +91,7 @@ class HomeViewModel @Inject constructor(
     private fun initVolume() {
         viewModelScope.launch {
             val volume = getVolumeUseCase.execute()
+            println("vladlog: volume = $volume")
             _state.update {
                 it.copy(volume = volume)
             }
@@ -100,6 +101,7 @@ class HomeViewModel @Inject constructor(
     private fun initSensitivity() {
         viewModelScope.launch {
             val sensitivity = getSensitivityUseCase.execute()
+            println("vladlog: sensitivity = $sensitivity")
             _state.update {
                 it.copy(sensitivity = sensitivity)
             }
