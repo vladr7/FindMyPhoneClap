@@ -36,7 +36,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,11 +50,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -340,21 +339,31 @@ private fun DrawScope.volumeSensitivitySliders(
         slidersOuterPadding
     )
     textOnSliders(sliderAngle, redSliderValue, blueSliderValue)
-    textValuesOnTheSideOfSliders(sliderAngle, redSliderValue, blueSliderValue)
+    textValuesOnTheSideOfSliders(
+        sliderAngle,
+        redSliderValue,
+        blueSliderValue,
+        animatedRedColor,
+        animatedBlueColor
+    )
 }
 
 private fun DrawScope.textValuesOnTheSideOfSliders(
     sliderAngle: Float,
     redSliderValue: Float,
-    blueSliderValue: Float
+    blueSliderValue: Float,
+    animatedRedColor: Color,
+    animatedBlueColor: Color
 ) {
-    val baseTextSize = 60f
+    val baseTextSize = 50f
+    val textOffsetRadius = 85f
+
     val paintRed = android.graphics.Paint().apply {
         isAntiAlias = true
         textSize = baseTextSize
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         textAlign = android.graphics.Paint.Align.CENTER
-        color = android.graphics.Color.WHITE
+        color = animatedRedColor.toArgb()
     }
 
     val paintBlue = android.graphics.Paint().apply {
@@ -362,33 +371,25 @@ private fun DrawScope.textValuesOnTheSideOfSliders(
         textSize = baseTextSize
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         textAlign = android.graphics.Paint.Align.CENTER
-        color = android.graphics.Color.WHITE
+        color = ActivateButtonColor.toArgb()
     }
 
-    drawIntoCanvas { canvas ->
-        val pathRed = Path().apply {
-            addArc(
-                0f,
-                0f,
-                size.width,
-                size.height,
-                180f,
-                sliderAngle * redSliderValue
-            )
-        }
-        canvas.nativeCanvas.drawTextOnPath("${(redSliderValue * 100).toInt()}", pathRed, 0f, 0f, paintRed)
+    val centerX = size.width / 2
+    val centerY = size.height / 2
 
-        val pathBlue = Path().apply {
-            addArc(
-                0f,
-                0f,
-                size.width,
-                size.height,
-                360f - (sliderAngle * blueSliderValue),
-                sliderAngle * blueSliderValue
-            )
-        }
-        canvas.nativeCanvas.drawTextOnPath("${(blueSliderValue * 100).toInt()}", pathBlue, 0f, 0f, paintBlue)
+    val redSliderRadians = Math.toRadians((180 + sliderAngle * redSliderValue).toDouble()).toFloat()
+    val blueSliderRadians =
+        Math.toRadians((360 - sliderAngle * blueSliderValue).toDouble()).toFloat()
+
+    val redX = centerX + (centerX + textOffsetRadius) * cos(redSliderRadians)
+    val redY = centerY + (centerY + textOffsetRadius) * sin(redSliderRadians)
+
+    val blueX = centerX + (centerX + textOffsetRadius) * cos(blueSliderRadians)
+    val blueY = centerY + (centerY + textOffsetRadius) * sin(blueSliderRadians)
+
+    drawIntoCanvas { canvas ->
+        canvas.nativeCanvas.drawText("${(redSliderValue * 100).toInt()}", redX, redY, paintRed)
+        canvas.nativeCanvas.drawText("${(blueSliderValue * 100).toInt()}", blueX, blueY, paintBlue)
     }
 }
 
