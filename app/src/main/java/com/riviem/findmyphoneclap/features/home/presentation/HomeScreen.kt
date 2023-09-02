@@ -16,6 +16,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -56,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -191,16 +193,18 @@ fun ActivateServiceContent(
     sensitivity: Int,
     onSensitivityChange: (Int) -> Unit
 ) {
+    val boxSize = 300.dp
     Box(
         modifier = modifier
-            .size(200.dp)
+            .size(boxSize)
     ) {
         Sliders(
             isServiceActive = isServiceActive,
             volume = volume,
             onVolumeChange = onVolumeChange,
             sensitivity = sensitivity,
-            onSensitivityChange = onSensitivityChange
+            onSensitivityChange = onSensitivityChange,
+            boxSize = boxSize
         )
         if (isServiceActive) {
             PulsatingCircle(
@@ -247,6 +251,7 @@ private fun BoxScope.Sliders(
     onSensitivityChange: (Int) -> Unit,
     volume: Int,
     onVolumeChange: (Int) -> Unit,
+    boxSize: Dp
 ) {
     var draggingRedSlider by remember { mutableStateOf(false) }
     var draggingBlueSlider by remember { mutableStateOf(false) }
@@ -265,7 +270,8 @@ private fun BoxScope.Sliders(
 
     AnimatedVisibility(
         modifier = Modifier
-            .size(200.dp),
+            .clickable{}
+            .size(boxSize),
         visible = isServiceActive,
         enter = scaleIn(),
         exit = scaleOut()
@@ -327,7 +333,7 @@ private fun DrawScope.volumeSensitivitySliders(
     animatedBlueColor: Color,
     sliderWidth: Float = 27.dp.toPx(),
     sliderAngle: Float = 75f,
-    slidersOuterPadding: Float = -12.dp.toPx()
+    slidersOuterPadding: Float = 70.dp.toPx()
 ) {
     sliders(
         animatedRedColor,
@@ -338,13 +344,13 @@ private fun DrawScope.volumeSensitivitySliders(
         blueSliderValue,
         slidersOuterPadding
     )
-    textOnSliders(sliderAngle, redSliderValue, blueSliderValue)
+    textOnSliders(sliderAngle, redSliderValue, blueSliderValue, slidersOuterPadding)
     textValuesOnTheSideOfSliders(
         sliderAngle,
         redSliderValue,
         blueSliderValue,
         animatedRedColor,
-        animatedBlueColor
+        animatedBlueColor,
     )
 }
 
@@ -353,10 +359,10 @@ private fun DrawScope.textValuesOnTheSideOfSliders(
     redSliderValue: Float,
     blueSliderValue: Float,
     animatedRedColor: Color,
-    animatedBlueColor: Color
+    animatedBlueColor: Color,
 ) {
     val baseTextSize = 50f
-    val textOffsetRadius = 85f
+    val textOffsetRadius = -15f
 
     val paintRed = android.graphics.Paint().apply {
         isAntiAlias = true
@@ -451,7 +457,8 @@ private fun DrawScope.sliders(
 private fun DrawScope.textOnSliders(
     sliderAngle: Float,
     redSliderValue: Float,
-    blueSliderValue: Float
+    blueSliderValue: Float,
+    slidersOuterPadding: Float
 ) {
     val baseTextSize = 56f
     val minTextSize = baseTextSize * 0.4f
@@ -473,26 +480,28 @@ private fun DrawScope.textOnSliders(
         textAlign = android.graphics.Paint.Align.CENTER
         color = android.graphics.Color.WHITE
     }
+    val adjustedPadding = slidersOuterPadding * 0.6f
 
     drawIntoCanvas { canvas ->
         val pathRed = Path().apply {
             addArc(
-                0f,
-                0f,
-                size.width,
-                size.height,
+                adjustedPadding,
+                adjustedPadding,
+                size.width - adjustedPadding,
+                size.height - adjustedPadding,
                 180f,
                 sliderAngle * redSliderValue
             )
         }
+
         canvas.nativeCanvas.drawTextOnPath("Volume", pathRed, 0f, 0f, paintRed)
 
         val pathBlue = Path().apply {
             addArc(
-                0f,
-                0f,
-                size.width,
-                size.height,
+                adjustedPadding,
+                adjustedPadding,
+                size.width - adjustedPadding,
+                size.height - adjustedPadding,
                 360f - (sliderAngle * blueSliderValue),
                 sliderAngle * blueSliderValue
             )
