@@ -13,15 +13,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -29,6 +22,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,7 +59,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -145,26 +138,29 @@ fun HomeScreen(
     pauseDuration: Int,
     onPauseDurationChange: (Int) -> Unit,
 ) {
-
-
     GradientBackgroundScreen {
         Column(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             GreetingText(
                 modifier = Modifier
                     .padding(top = 30.dp)
             )
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
             ActivateServiceContent(
-                modifier = Modifier
-                    .padding(top = 70.dp),
+                modifier = Modifier,
                 onClick = onActivationClick,
                 isServiceActive = isServiceActive
             )
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
         }
     }
+
 }
 
 @Composable
@@ -191,7 +187,7 @@ fun ActivateServiceContent(
         modifier = modifier
             .size(200.dp)
     ) {
-        SlidersAndGlowing(
+        Sliders(
             isServiceActive
         )
         if (isServiceActive) {
@@ -200,6 +196,7 @@ fun ActivateServiceContent(
                 scale = 400f,
             )
         }
+        GlowStartServiceButton(isServiceActive)
         StartServiceButton(
             modifier = Modifier,
             onClick = onClick,
@@ -209,7 +206,30 @@ fun ActivateServiceContent(
 }
 
 @Composable
-private fun BoxScope.SlidersAndGlowing(
+private fun BoxScope.GlowStartServiceButton(isServiceActive: Boolean) {
+    Canvas(
+        modifier = Modifier.Companion
+            .matchParentSize()
+    ) {
+        val color = if (!isServiceActive) ActivateButtonColor else DeactivateButtonColor
+        val gradient = Brush.radialGradient(
+            colors = listOf(
+                color.copy(alpha = 0.5f),
+                Color.Transparent
+            ),
+            center = Offset(size.width / 2, size.height / 2),
+            radius = size.width / 2
+        )
+        drawCircle(
+            brush = gradient,
+            center = Offset(size.width / 2, size.height / 2),
+            radius = size.width / 2
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.Sliders(
     isServiceActive: Boolean
 ) {
     var draggingRedSlider by remember { mutableStateOf(false) }
@@ -276,7 +296,7 @@ private fun BoxScope.SlidersAndGlowing(
                     )
                 }
         ) {
-            volumeSensitivitySlidersAndGlowing(
+            volumeSensitivitySliders(
                 redSliderValue = redSliderValue,
                 blueSliderValue = blueSliderValue,
                 animatedRedColor = animatedRedColor,
@@ -286,7 +306,7 @@ private fun BoxScope.SlidersAndGlowing(
     }
 }
 
-private fun DrawScope.volumeSensitivitySlidersAndGlowing(
+private fun DrawScope.volumeSensitivitySliders(
     redSliderValue: Float,
     blueSliderValue: Float,
     animatedRedColor: Color,
@@ -339,25 +359,6 @@ private fun DrawScope.sliders(
         size = size,
         topLeft = Offset(0f, 0f),
         style = Stroke(width = sliderWidth, cap = StrokeCap.Round)
-    )
-}
-
-private fun DrawScope.glowingEffectActivateButton(
-    isServiceActive: Boolean
-) {
-    val color = if (!isServiceActive) ActivateButtonColor else DeactivateButtonColor
-    val gradient = Brush.radialGradient(
-        colors = listOf(
-            color.copy(alpha = 0.5f),
-            Color.Transparent
-        ),
-        center = Offset(size.width / 2, size.height / 2),
-        radius = size.width / 2
-    )
-    drawCircle(
-        brush = gradient,
-        center = Offset(size.width / 2, size.height / 2),
-        radius = size.width / 2
     )
 }
 
@@ -420,6 +421,8 @@ private fun BoxScope.StartServiceButton(
     onClick: () -> Unit, modifier: Modifier,
     isServiceActive: Boolean
 ) {
+
+
     val animatedColor = animateColorAsState(
         targetValue = if (!isServiceActive) ActivateButtonColor else Color.Red,
         animationSpec = tween(
@@ -448,14 +451,7 @@ private fun BoxScope.StartServiceButton(
         )
     }
 
-    Canvas(
-        modifier = Modifier.Companion
-            .matchParentSize()
-    ) {
-        glowingEffectActivateButton(
-            isServiceActive = isServiceActive,
-        )
-    }
+
 }
 
 
