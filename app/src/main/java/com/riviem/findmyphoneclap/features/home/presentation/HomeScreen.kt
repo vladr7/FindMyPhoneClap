@@ -218,12 +218,12 @@ private fun BoxScope.GlowStartServiceButton(isServiceActive: Boolean) {
                 Color.Transparent
             ),
             center = Offset(size.width / 2, size.height / 2),
-            radius = size.width / 2
+            radius = size.width / 2 + 50f
         )
         drawCircle(
             brush = gradient,
             center = Offset(size.width / 2, size.height / 2),
-            radius = size.width / 2
+            radius = size.width / 2 + 50f
         )
     }
 }
@@ -418,38 +418,44 @@ private fun DrawScope.textOnSliders(
 
 @Composable
 private fun BoxScope.StartServiceButton(
-    onClick: () -> Unit, modifier: Modifier,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     isServiceActive: Boolean
 ) {
 
+    val gradientBrush = Brush.linearGradient(
+        colors = listOf(
+            if (!isServiceActive) ActivateButtonColor else DeactivateButtonColor,
+            Color.White
+        ),
 
-    val animatedColor = animateColorAsState(
-        targetValue = if (!isServiceActive) ActivateButtonColor else Color.Red,
-        animationSpec = tween(
-            durationMillis = 400,
-            easing = FastOutSlowInEasing
-        ), label = ""
     )
 
-    Button(
-        onClick = onClick,
-        modifier = Modifier.Companion
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(110.dp)
             .align(Alignment.Center)
-            .bounceClick()
-            .size(100.dp),
-        shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = animatedColor.value,
-            contentColor = Color.White
-        ),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+            .background(brush = gradientBrush, shape = CircleShape)
     ) {
-        Icon(
-            imageVector = if (!isServiceActive) Icons.Default.PlayArrow else Icons.Default.Stop,
-            contentDescription = "Activate Service",
-            modifier = modifier.size(40.dp)
-        )
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxSize(),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+        ) {
+            Icon(
+                imageVector = if (!isServiceActive) Icons.Default.PlayArrow else Icons.Default.Stop,
+                contentDescription = "Activate Service",
+                modifier = Modifier.size(40.dp)
+            )
+        }
     }
+
 
 
 }
