@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -236,8 +237,6 @@ private fun BoxScope.Sliders(
     var draggingBlueSlider by remember { mutableStateOf(false) }
     var redSliderValue by remember { mutableFloatStateOf(1f) }
     var blueSliderValue by remember { mutableFloatStateOf(1f) }
-    var isVisible by remember { mutableStateOf(true) }
-    isVisible = isServiceActive
     val animatedRedColor by animateColorAsState(
         targetValue = if (redSliderValue > 0.9f) Color.Red else Color(
             0xFFff006e
@@ -252,7 +251,7 @@ private fun BoxScope.Sliders(
     AnimatedVisibility(
         modifier = Modifier
             .size(200.dp),
-        visible = isVisible,
+        visible = isServiceActive,
         enter = scaleIn(),
         exit = scaleOut()
     ) {
@@ -311,8 +310,9 @@ private fun DrawScope.volumeSensitivitySliders(
     blueSliderValue: Float,
     animatedRedColor: Color,
     animatedBlueColor: Color,
-    sliderWidth: Float = 25.dp.toPx(),
+    sliderWidth: Float = 27.dp.toPx(),
     sliderAngle: Float = 75f,
+    slidersOuterPadding: Float = -12.dp.toPx()
 ) {
     sliders(
         animatedRedColor,
@@ -320,7 +320,8 @@ private fun DrawScope.volumeSensitivitySliders(
         redSliderValue,
         sliderWidth,
         animatedBlueColor,
-        blueSliderValue
+        blueSliderValue,
+        slidersOuterPadding
     )
     textOnSliders(sliderAngle, redSliderValue, blueSliderValue)
 }
@@ -331,19 +332,23 @@ private fun DrawScope.sliders(
     redSliderValue: Float,
     sliderWidth: Float,
     animatedBlueColor: Color,
-    blueSliderValue: Float
+    blueSliderValue: Float,
+    outerPadding: Float
 ) {
+    val newSize = Size(size.width - outerPadding, size.height - outerPadding)
+    val newTopLeft = Offset(outerPadding / 2, outerPadding / 2)
+
     drawArc(
         brush = Brush.verticalGradient(
             colors = listOf(animatedRedColor, Color.White),
             startY = 0f,
-            endY = size.height
+            endY = newSize.height
         ),
         startAngle = 180f,
         sweepAngle = sliderAngle * redSliderValue,
         useCenter = false,
-        size = size,
-        topLeft = Offset(0f, 0f),
+        size = newSize,
+        topLeft = newTopLeft,
         style = Stroke(width = sliderWidth, cap = StrokeCap.Round)
     )
 
@@ -351,16 +356,17 @@ private fun DrawScope.sliders(
         brush = Brush.verticalGradient(
             colors = listOf(animatedBlueColor, Color.White),
             startY = 0f,
-            endY = size.height
+            endY = newSize.height
         ),
         startAngle = 0f,
         sweepAngle = -sliderAngle * blueSliderValue,
         useCenter = false,
-        size = size,
-        topLeft = Offset(0f, 0f),
+        size = newSize,
+        topLeft = newTopLeft,
         style = Stroke(width = sliderWidth, cap = StrokeCap.Round)
     )
 }
+
 
 private fun DrawScope.textOnSliders(
     sliderAngle: Float,
@@ -391,8 +397,8 @@ private fun DrawScope.textOnSliders(
     drawIntoCanvas { canvas ->
         val pathRed = Path().apply {
             addArc(
-                15f,
-                15f,
+                0f,
+                0f,
                 size.width,
                 size.height,
                 180f,
@@ -403,8 +409,8 @@ private fun DrawScope.textOnSliders(
 
         val pathBlue = Path().apply {
             addArc(
-                20f,
-                20f,
+                0f,
+                0f,
                 size.width,
                 size.height,
                 360f - (sliderAngle * blueSliderValue),
