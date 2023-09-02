@@ -281,7 +281,6 @@ private fun BoxScope.SlidersAndGlowing(
                 blueSliderValue = blueSliderValue,
                 animatedRedColor = animatedRedColor,
                 animatedBlueColor = animatedBlueColor,
-                isServiceActive = isServiceActive
             )
         }
     }
@@ -294,11 +293,7 @@ private fun DrawScope.volumeSensitivitySlidersAndGlowing(
     animatedBlueColor: Color,
     sliderWidth: Float = 25.dp.toPx(),
     sliderAngle: Float = 75f,
-    isServiceActive: Boolean,
 ) {
-    glowingEffectActivateButton(
-        isServiceActive = isServiceActive,
-    )
     sliders(
         animatedRedColor,
         sliderAngle,
@@ -350,8 +345,6 @@ private fun DrawScope.sliders(
 private fun DrawScope.glowingEffectActivateButton(
     isServiceActive: Boolean
 ) {
-
-
     val color = if (!isServiceActive) ActivateButtonColor else DeactivateButtonColor
     val gradient = Brush.radialGradient(
         colors = listOf(
@@ -452,6 +445,15 @@ private fun BoxScope.StartServiceButton(
             imageVector = if (!isServiceActive) Icons.Default.PlayArrow else Icons.Default.Stop,
             contentDescription = "Activate Service",
             modifier = modifier.size(40.dp)
+        )
+    }
+
+    Canvas(
+        modifier = Modifier.Companion
+            .matchParentSize()
+    ) {
+        glowingEffectActivateButton(
+            isServiceActive = isServiceActive,
         )
     }
 }
