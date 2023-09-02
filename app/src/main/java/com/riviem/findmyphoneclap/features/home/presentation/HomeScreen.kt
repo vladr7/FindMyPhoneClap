@@ -55,6 +55,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,6 +74,8 @@ import com.riviem.findmyphoneclap.ui.theme.BackgroundTopColor
 import com.riviem.findmyphoneclap.ui.theme.DeactivateButtonColor
 import kotlin.math.PI
 import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun HomeRoute(
@@ -337,7 +340,58 @@ private fun DrawScope.volumeSensitivitySliders(
         slidersOuterPadding
     )
     textOnSliders(sliderAngle, redSliderValue, blueSliderValue)
+    textValuesOnTheSideOfSliders(sliderAngle, redSliderValue, blueSliderValue)
 }
+
+private fun DrawScope.textValuesOnTheSideOfSliders(
+    sliderAngle: Float,
+    redSliderValue: Float,
+    blueSliderValue: Float
+) {
+    val baseTextSize = 60f
+    val paintRed = android.graphics.Paint().apply {
+        isAntiAlias = true
+        textSize = baseTextSize
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = android.graphics.Paint.Align.CENTER
+        color = android.graphics.Color.WHITE
+    }
+
+    val paintBlue = android.graphics.Paint().apply {
+        isAntiAlias = true
+        textSize = baseTextSize
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = android.graphics.Paint.Align.CENTER
+        color = android.graphics.Color.WHITE
+    }
+
+    drawIntoCanvas { canvas ->
+        val pathRed = Path().apply {
+            addArc(
+                0f,
+                0f,
+                size.width,
+                size.height,
+                180f,
+                sliderAngle * redSliderValue
+            )
+        }
+        canvas.nativeCanvas.drawTextOnPath("${(redSliderValue * 100).toInt()}", pathRed, 0f, 0f, paintRed)
+
+        val pathBlue = Path().apply {
+            addArc(
+                0f,
+                0f,
+                size.width,
+                size.height,
+                360f - (sliderAngle * blueSliderValue),
+                sliderAngle * blueSliderValue
+            )
+        }
+        canvas.nativeCanvas.drawTextOnPath("${(blueSliderValue * 100).toInt()}", pathBlue, 0f, 0f, paintBlue)
+    }
+}
+
 
 private fun DrawScope.sliders(
     animatedRedColor: Color,
