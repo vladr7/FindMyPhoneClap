@@ -388,9 +388,21 @@ private fun DrawScope.textValuesOnTheSideOfSliders(
     val blueY = centerY + (centerY + textOffsetRadius) * sin(blueSliderRadians)
 
     drawIntoCanvas { canvas ->
-        canvas.nativeCanvas.drawText("${(redSliderValue * 100).toInt()}", redX, redY, paintRed)
-        canvas.nativeCanvas.drawText("${(blueSliderValue * 100).toInt()}", blueX, blueY, paintBlue)
+        canvas.nativeCanvas.drawText(
+            "${
+                roundUpToEven((redSliderValue * 100).toInt())
+            }", redX, redY, paintRed
+        )
+        canvas.nativeCanvas.drawText(
+            "${
+                roundUpToEven((blueSliderValue * 100).toInt())
+            }", blueX, blueY, paintBlue
+        )
     }
+}
+
+fun roundUpToEven(number: Int): Int {
+    return if (number % 2 == 0) number else number + 1
 }
 
 
