@@ -166,7 +166,13 @@ fun HomeScreen(
             )
         }
     }
-
+    if (shouldAskForMicrophonePermission) {
+        MicrophonePermissionDialog(
+            activity = activity,
+            context = context,
+            onMicrophonePermissionDismissed = onMicrophonePermissionFlowDone,
+        )
+    }
 }
 
 @Composable
