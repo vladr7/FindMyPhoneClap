@@ -27,7 +27,6 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val hasMicrophonePermissionUseCase: HasMicrophonePermissionUseCase,
-    private val askForBypassDNDPermissionUseCase: AskForBypassDNDPermissionUseCase,
     private val isServiceRunningUseCase: IsServiceRunningUseCase,
     private val getVolumeUseCase: GetVolumeUseCase,
     private val getSensitivityUseCase: GetSensitivityUseCase,
@@ -35,10 +34,6 @@ class HomeViewModel @Inject constructor(
     private val setSensitivityUseCase: SetSensitivityUseCase,
     private val startServiceUseCase: StartServiceUseCase,
     private val stopServiceUseCase: StopServiceUseCase,
-    private val hasBypassDNDPermissionUseCase: HasBypassDNDPermissionUseCase,
-    private val setBypassDNDPermissionUseCase: SetBypassDNDPermissionUseCase,
-    private val setSongDurationUseCase: SetSongDurationUseCase,
-    private val getSongDurationUseCase: GetSongDurationUseCase,
     private val pauseServiceForDurationUseCase: PauseServiceForDurationUseCase
 ): ViewModel() {
 
@@ -49,34 +44,6 @@ class HomeViewModel @Inject constructor(
         initSensitivity()
         initVolume()
         initServiceState()
-        initBypassDNDState()
-        initSongDuration()
-    }
-
-    private fun initSongDuration() {
-        viewModelScope.launch {
-            val songDuration = getSongDurationUseCase.execute()
-            _state.update {
-                it.copy(songDuration = songDuration)
-            }
-        }
-    }
-
-    private fun initBypassDNDState() {
-        viewModelScope.launch {
-            when(hasBypassDNDPermissionUseCase.execute()) {
-                BypassDNDState.ENABLED -> {
-                    _state.update {
-                        it.copy(isBypassDNDActive = true)
-                    }
-                }
-                else -> {
-                    _state.update {
-                        it.copy(isBypassDNDActive = false)
-                    }
-                }
-            }
-        }
     }
 
     private fun initServiceState() {
@@ -91,7 +58,6 @@ class HomeViewModel @Inject constructor(
     private fun initVolume() {
         viewModelScope.launch {
             val volume = getVolumeUseCase.execute()
-            println("vladlog: volume = $volume")
             _state.update {
                 it.copy(volume = volume)
             }
@@ -101,7 +67,6 @@ class HomeViewModel @Inject constructor(
     private fun initSensitivity() {
         viewModelScope.launch {
             val sensitivity = getSensitivityUseCase.execute()
-            println("vladlog: sensitivity = $sensitivity")
             _state.update {
                 it.copy(sensitivity = sensitivity)
             }
@@ -123,15 +88,6 @@ class HomeViewModel @Inject constructor(
         }
         _state.update {
             it.copy(sensitivity = newValue)
-        }
-    }
-
-    fun onSongDurationChange(newValue: Int) {
-        viewModelScope.launch {
-            setSongDurationUseCase.execute(newValue)
-        }
-        _state.update {
-            it.copy(songDuration = newValue)
         }
     }
 
@@ -167,28 +123,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onBypassDoNotDisturbClick() {
-        viewModelScope.launch {
-            when(hasBypassDNDPermissionUseCase.execute()) {
-                BypassDNDState.ENABLED -> {
-                    setBypassDNDPermissionUseCase.execute(false)
-                    _state.update {
-                        it.copy(isBypassDNDActive = false)
-                    }
-                }
-                BypassDNDState.DISABLED_FROM_LOCAL_STORAGE -> {
-                    setBypassDNDPermissionUseCase.execute(true)
-                    _state.update {
-                        it.copy(isBypassDNDActive = true)
-                    }
-                }
-                BypassDNDState.DISABLED_FROM_SYSTEM -> {
-                    askForBypassDNDPermissionUseCase.execute()
-                }
-            }
-        }
-    }
-
     fun resetShouldAskForMicrophonePermission() {
         _state.update {
             it.copy(shouldAskForMicrophonePermission = false)
@@ -208,9 +142,7 @@ class HomeViewModel @Inject constructor(
 data class HomeViewState(
     val sensitivity: Int = 0,
     val volume: Int = 0,
-    val songDuration: Int = 0,
     val isServiceActivated: Boolean = false,
     val shouldAskForMicrophonePermission: Boolean = false,
-    val isBypassDNDActive: Boolean = false,
     val pauseDuration: Int = 0
 )

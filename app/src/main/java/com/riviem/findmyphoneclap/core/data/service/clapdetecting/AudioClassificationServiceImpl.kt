@@ -71,18 +71,30 @@ class AudioClassificationServiceImpl @Inject constructor(
     }
 
     override fun setVolume(volume: Int) {
+        if (!bound) {
+            return
+        }
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(volume = volume)
     }
 
     override fun setSongDuration(songDurationMillis: Long) {
+        if (!bound) {
+            return
+        }
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(songDuration = songDurationMillis)
     }
 
     override fun setBypassDNDPermissionEnabled(isEnabled: Boolean) {
+        if (!bound) {
+            return
+        }
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(isBypassDNDPermissionEnabled = isEnabled)
     }
 
     override suspend fun pauseServiceForDuration(durationMillis: Long) {
+        if (!bound) {
+            return
+        }
         audioTFLite.pauseServiceForDuration(durationMillis)
     }
 }
