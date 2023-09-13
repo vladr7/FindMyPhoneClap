@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,18 +17,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoDisturbOn
 import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -106,10 +114,12 @@ fun SettingsScreen(
                 startIconColor = SettingsVolumeIconColor,
             )
 //        RemoveUnusedAppPermissionButton(activity = activity)
-//        SongDurationSlider(
-//            songDuration = songDuration,
-//            onSongDurationChange = onSongDurationChange
-//        )
+            Spacer(modifier = Modifier.height(20.dp))
+            SongDurationSlider(
+                modifier = Modifier,
+                songDuration = songDuration,
+                onSongDurationChange = onSongDurationChange
+            )
         }
     }
 }
@@ -241,24 +251,58 @@ fun RemoveUnusedAppPermissionButton(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDurationSlider(
+    modifier: Modifier = Modifier,
     songDuration: Int,
     onSongDurationChange: (Int) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(110.dp)
+            .border(
+                1.dp,
+                Color.Gray.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("Song Duration $songDuration seconds")
-        Slider(
-            value = songDuration.toFloat(),
-            onValueChange = { newValue ->
-                onSongDurationChange(newValue.toInt())
-            },
-            valueRange = 1f..10f,
-            steps = 9
-        )
+        Column(
+            modifier = Modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceAround,
+        ) {
+            Text(
+                text = if(songDuration != 1) "Play sound Duration $songDuration seconds" else "Play sound Duration $songDuration second",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            Slider(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp),
+                value = songDuration.toFloat(),
+                onValueChange = { newValue ->
+                    onSongDurationChange(newValue.toInt())
+                },
+                valueRange = 1f..10f,
+                steps = 9,
+                colors = SliderColors(
+                    thumbColor = SettingsActivateSwitchButtonColor,
+                    activeTrackColor = SettingsActivateSwitchButtonColor,
+                    activeTickColor = SettingsActivateSwitchButtonColor.copy(alpha = 0.7f),
+                    inactiveTrackColor = SettingsInactiveSwitchButtonColor,
+                    inactiveTickColor = SettingsInactiveSwitchTrackColor,
+                    disabledThumbColor = SettingsDisabledSwitchButtonColor,
+                    disabledActiveTrackColor = SettingsDisabledSwitchTrackColor,
+                    disabledActiveTickColor = SettingsDisabledSwitchTrackColor.copy(alpha = 0.7f),
+                    disabledInactiveTrackColor = SettingsDisabledSwitchButtonColor,
+                    disabledInactiveTickColor = SettingsDisabledSwitchTrackColor
+                ),
+            )
+        }
     }
 }
