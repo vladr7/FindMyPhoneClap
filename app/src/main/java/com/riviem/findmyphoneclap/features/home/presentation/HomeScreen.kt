@@ -136,7 +136,7 @@ fun HomeScreen(
         ) {
             GreetingText(
                 modifier = Modifier
-                    .padding(top = 30.dp)
+                    .padding(top = 16.dp)
             )
             Spacer(
                 modifier = Modifier.weight(1f)
@@ -171,8 +171,9 @@ fun GreetingText(
     BasicText(
         text = stringResource(R.string.welcome),
         style = TextStyle(
-            fontSize = 30.sp,
-            color = Color.White
+            fontSize = 24.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
         ),
         modifier = modifier
     )
