@@ -22,7 +22,7 @@ class SettingsViewModel @Inject constructor(
     private val setSongDurationUseCase: SetSongDurationUseCase,
     private val getSongDurationUseCase: GetSongDurationUseCase,
     private val askForBypassDNDPermissionUseCase: AskForBypassDNDPermissionUseCase,
-    ): ViewModel() {
+) : ViewModel() {
 
     private val _state = MutableStateFlow<SettingsViewState>(SettingsViewState())
     val state: StateFlow<SettingsViewState> = _state
@@ -43,12 +43,13 @@ class SettingsViewModel @Inject constructor(
 
     private fun initBypassDNDState() {
         viewModelScope.launch {
-            when(hasBypassDNDPermissionUseCase.execute()) {
+            when (hasBypassDNDPermissionUseCase.execute()) {
                 BypassDNDState.ENABLED -> {
                     _state.update {
                         it.copy(isBypassDNDActive = true)
                     }
                 }
+
                 else -> {
                     _state.update {
                         it.copy(isBypassDNDActive = false)
@@ -60,19 +61,24 @@ class SettingsViewModel @Inject constructor(
 
     fun onBypassDoNotDisturbClick() {
         viewModelScope.launch {
-            when(hasBypassDNDPermissionUseCase.execute()) {
+            when (hasBypassDNDPermissionUseCase.execute()) {
                 BypassDNDState.ENABLED -> {
                     setBypassDNDPermissionUseCase.execute(false)
                     _state.update {
                         it.copy(isBypassDNDActive = false)
                     }
                 }
+
                 BypassDNDState.DISABLED_FROM_LOCAL_STORAGE -> {
                     setBypassDNDPermissionUseCase.execute(true)
                     _state.update {
-                        it.copy(isBypassDNDActive = true)
+                        it.copy(
+                            isBypassDNDActive = true,
+                            showBypassDNDToast = true
+                        )
                     }
                 }
+
                 BypassDNDState.DISABLED_FROM_SYSTEM -> {
                     askForBypassDNDPermissionUseCase.execute()
                 }
@@ -88,6 +94,12 @@ class SettingsViewModel @Inject constructor(
             it.copy(songDuration = newValue)
         }
     }
+
+    fun onBypassDNDToastShown() {
+        _state.update {
+            it.copy(showBypassDNDToast = false)
+        }
+    }
 }
 
 
@@ -95,5 +107,6 @@ data class SettingsViewState(
     val songDuration: Int = 0,
     val shouldAskForMicrophonePermission: Boolean = false,
     val isBypassDNDActive: Boolean = false,
-    val pauseDuration: Int = 0
+    val pauseDuration: Int = 0,
+    val showBypassDNDToast: Boolean = false
 )

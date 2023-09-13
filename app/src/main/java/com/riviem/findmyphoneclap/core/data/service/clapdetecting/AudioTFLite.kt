@@ -161,9 +161,12 @@ class AudioTFLite @Inject constructor() : Service() {
 
     private suspend fun playSound() {
         val originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        println("isDNDEnabled: ${isDNDEnabled()} --- isBypassDNDPermissionEnabled: ${serviceSettings.isBypassDNDPermissionEnabled}")
         if (isDNDEnabled() && !serviceSettings.isBypassDNDPermissionEnabled) {
+            println("DND is enabled and bypass DND permission is not enabled")
             return
         }
+        println("playing sound")
         val originalRingerMode = audioManager.ringerMode
         if (!mediaPlayer.isPlaying) {
             try {
