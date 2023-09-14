@@ -389,8 +389,8 @@ fun ChooseSoundSlider(
                         }
                     }
                 },
-                valueRange = 1f..3f,
-                steps = 3,
+                valueRange = 1f..ChooseSound.values().size.toFloat(),
+                steps = ChooseSound.values().size - 2,
                 colors = SliderColors(
                     thumbColor = SettingsActivateSwitchButtonColor,
                     activeTrackColor = SettingsActivateSwitchButtonColor,
