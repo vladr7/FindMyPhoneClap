@@ -1,8 +1,11 @@
 package com.riviem.findmyphoneclap.core.data.models
 
+import com.riviem.findmyphoneclap.R
+
 data class ServiceSettings(
-    var sensitivity: Int = 0,
-    var volume: Int = 0,
-    var songDuration: Long = 0,
-    var isBypassDNDPermissionEnabled: Boolean = false,
+    val sensitivity: Int = 0,
+    val volume: Int = 0,
+    val songDuration: Long = 0,
+    val isBypassDNDPermissionEnabled: Boolean = false,
+    val currentSoundId: Int = R.raw.birdwhistle,
 )

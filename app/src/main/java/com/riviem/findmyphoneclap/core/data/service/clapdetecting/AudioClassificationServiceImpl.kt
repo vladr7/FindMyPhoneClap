@@ -97,4 +97,13 @@ class AudioClassificationServiceImpl @Inject constructor(
         }
         audioTFLite.pauseServiceForDuration(durationMillis)
     }
+
+    override fun setCurrentSoundId(soundId: Int) {
+        if (!bound) {
+            return
+        }
+        audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(currentSoundId = soundId)
+        audioTFLite.clearMediaPlayer()
+        audioTFLite.createMediaPlayer(currentSound = soundId)
+    }
 }

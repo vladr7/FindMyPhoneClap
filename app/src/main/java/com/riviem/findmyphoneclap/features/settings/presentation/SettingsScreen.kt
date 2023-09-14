@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.riviem.findmyphoneclap.MainActivity
 import com.riviem.findmyphoneclap.R
 import com.riviem.findmyphoneclap.features.home.presentation.GradientBackgroundScreen
+import com.riviem.findmyphoneclap.features.settings.enums.ChooseSound
 import com.riviem.findmyphoneclap.ui.theme.SettingsActivateSwitchButtonColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsDisabledSwitchBorderColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsDisabledSwitchButtonColor
@@ -83,6 +84,10 @@ fun SettingsRoute(
         showBypassDNDToast = state.showBypassDNDToast,
         onBypassDNDToastShown = {
             viewModel.onBypassDNDToastShown()
+        },
+        currentSound = state.currentSound,
+        onSoundChange = { newValue ->
+            viewModel.onCurrentSoundChange(newValue)
         }
     )
 }
@@ -97,7 +102,9 @@ fun SettingsScreen(
     isBypassDNDActive: Boolean,
     bypassDNDToastText: String,
     showBypassDNDToast: Boolean,
-    onBypassDNDToastShown: () -> Unit
+    onBypassDNDToastShown: () -> Unit,
+    currentSound: ChooseSound,
+    onSoundChange: (Int) -> Unit,
 ) {
     GradientBackgroundScreen {
         Column(
@@ -125,6 +132,11 @@ fun SettingsScreen(
                 modifier = Modifier,
                 songDuration = songDuration,
                 onSongDurationChange = onSongDurationChange
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            ChooseSoundSlider(
+                currentSound = currentSound,
+                onSoundChange = onSoundChange
             )
         }
     }
@@ -262,7 +274,6 @@ fun RemoveUnusedAppPermissionButton(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongDurationSlider(
     modifier: Modifier = Modifier,
@@ -317,3 +328,59 @@ fun SongDurationSlider(
         }
     }
 }
+
+@Composable
+fun ChooseSoundSlider(
+    modifier: Modifier = Modifier,
+    currentSound: ChooseSound,
+    onSoundChange: (Int) -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(110.dp)
+            .border(
+                1.dp,
+                Color.Gray.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceAround,
+        ) {
+            Text(
+                text = "Choose sound",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            Slider(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp),
+                value = currentSound.index.toFloat(),
+                onValueChange = { newValue ->
+                    onSoundChange(newValue.toInt())
+                },
+                valueRange = 1f..3f,
+                steps = 3,
+                colors = SliderColors(
+                    thumbColor = SettingsActivateSwitchButtonColor,
+                    activeTrackColor = SettingsActivateSwitchButtonColor,
+                    activeTickColor = SettingsActivateSwitchButtonColor.copy(alpha = 0.7f),
+                    inactiveTrackColor = SettingsInactiveSwitchButtonColor,
+                    inactiveTickColor = SettingsInactiveSwitchTrackColor,
+                    disabledThumbColor = SettingsDisabledSwitchButtonColor,
+                    disabledActiveTrackColor = SettingsDisabledSwitchTrackColor,
+                    disabledActiveTickColor = SettingsDisabledSwitchTrackColor.copy(alpha = 0.7f),
+                    disabledInactiveTrackColor = SettingsDisabledSwitchButtonColor,
+                    disabledInactiveTickColor = SettingsDisabledSwitchTrackColor
+                ),
+            )
+        }
+    }
+}
+
