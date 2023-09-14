@@ -60,6 +60,8 @@ import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchButtonColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchIconColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchTrackColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsVolumeIconColor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -345,7 +347,7 @@ fun ChooseSoundSlider(
     songDuration: Int
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    var coroutineScope = rememberCoroutineScope()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -378,6 +380,8 @@ fun ChooseSoundSlider(
                     mediaPlayer?.stop()
                     mediaPlayer?.release()
                     mediaPlayer = null
+                    coroutineScope.cancel()
+                    coroutineScope = CoroutineScope(Dispatchers.Main)
                     val newSound = ChooseSound.findByIndex(newValue.toInt())
                     newSound.let {
                         coroutineScope.launch {
