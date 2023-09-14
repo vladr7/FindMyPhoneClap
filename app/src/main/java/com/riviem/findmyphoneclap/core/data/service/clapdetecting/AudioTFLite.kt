@@ -157,7 +157,6 @@ class AudioTFLite @Inject constructor() : Service() {
     }
 
     fun createMediaPlayer(currentSound: Int) {
-        println("vladlog: createMediaPlayer: currentSound = $currentSound")
         mediaPlayer = MediaPlayer.create(
             this,
             currentSound
