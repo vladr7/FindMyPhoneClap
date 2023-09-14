@@ -3,6 +3,7 @@ package com.riviem.findmyphoneclap.features.settings.presentation
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
@@ -30,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,6 +60,9 @@ import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchButtonColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchIconColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchTrackColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsVolumeIconColor
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsRoute(
@@ -136,7 +141,8 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(20.dp))
             ChooseSoundSlider(
                 currentSound = currentSound,
-                onSoundChange = onSoundChange
+                onSoundChange = onSoundChange,
+                songDuration = songDuration,
             )
         }
     }
@@ -329,12 +335,17 @@ fun SongDurationSlider(
     }
 }
 
+private var mediaPlayer: MediaPlayer? = null
+
 @Composable
 fun ChooseSoundSlider(
     modifier: Modifier = Modifier,
     currentSound: ChooseSound,
-    onSoundChange: (Int) -> Unit
+    onSoundChange: (Int) -> Unit,
+    songDuration: Int
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -353,7 +364,7 @@ fun ChooseSoundSlider(
             verticalArrangement = Arrangement.SpaceAround,
         ) {
             Text(
-                text = "Choose sound",
+                text = "Choose sound: ${currentSound.title}",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
@@ -364,6 +375,19 @@ fun ChooseSoundSlider(
                 value = currentSound.index.toFloat(),
                 onValueChange = { newValue ->
                     onSoundChange(newValue.toInt())
+                    mediaPlayer?.stop()
+                    mediaPlayer?.release()
+                    mediaPlayer = null
+                    val newSound = ChooseSound.findByIndex(newValue.toInt())
+                    newSound.let {
+                        coroutineScope.launch {
+                            mediaPlayer = MediaPlayer.create(context, it.id)
+                            mediaPlayer?.isLooping = true
+                            mediaPlayer?.start()
+                            delay(songDuration * 1000L)
+                            mediaPlayer?.stop()
+                        }
+                    }
                 },
                 valueRange = 1f..3f,
                 steps = 3,
