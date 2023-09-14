@@ -37,5 +37,18 @@ val DeactivateButtonColor = Color(0xFFef233c)
 val BackgroundTopColor = Color(0xFF192C3C)
 val BackgroundBottomColor = Color(0xFF1F2236)
 
+// Settings Switch
+val SettingsActivateSwitchButtonColor = Color(0xFF91FFE8)
+val SettingsInactiveSwitchButtonColor = Color(0xFF808080)
+val SettingsInactiveSwitchTrackColor = Color(0xFFD3D3D3)
+val SettingsInactiveSwitchBorderColor = Color(0xFF8C8C8C)
+val SettingsInactiveSwitchIconColor = Color.White
+val SettingsDisabledSwitchButtonColor = Color(0xFFE0E0E0)
+val SettingsDisabledSwitchTrackColor = Color(0xFFCDCDCD)
+val SettingsDisabledSwitchBorderColor = Color(0xFFA8A8A8)
+val SettingsDisabledSwitchIconColor = Color.Gray
+
+val SettingsVolumeIconColor = Color(0xFFFD457A)
+
 
 val seed = Color(0xFF1B2136)

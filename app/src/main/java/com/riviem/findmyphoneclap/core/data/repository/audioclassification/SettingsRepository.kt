@@ -15,4 +15,6 @@ interface SettingsRepository {
     fun askForBypassDoNotDisturbPermission()
     suspend fun setByPassDoNotDisturbPermission(isEnabled: Boolean)
     fun logToFile(message: String)
+    suspend fun setCurrentSoundId(soundId: Int)
+    suspend fun getCurrentSoundId(): Int
 }

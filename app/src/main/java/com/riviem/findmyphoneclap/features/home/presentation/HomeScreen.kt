@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -99,14 +100,6 @@ fun HomeRoute(
         onVolumeChange = { newValue ->
             viewModel.onVolumeChange(newValue)
         },
-        songDuration = state.songDuration,
-        onSongDurationChange = { newValue ->
-            viewModel.onSongDurationChange(newValue)
-        },
-        onBypassDoNotDisturbClick = {
-            viewModel.onBypassDoNotDisturbClick()
-        },
-        isBypassDNDActive = state.isBypassDNDActive,
         shouldAskForMicrophonePermission = state.shouldAskForMicrophonePermission,
         onMicrophonePermissionFlowDone = {
             viewModel.resetShouldAskForMicrophonePermission()
@@ -129,10 +122,6 @@ fun HomeScreen(
     onVolumeChange: (Int) -> Unit,
     onActivationClick: () -> Unit,
     isServiceActive: Boolean,
-    songDuration: Int,
-    onSongDurationChange: (Int) -> Unit,
-    onBypassDoNotDisturbClick: () -> Unit,
-    isBypassDNDActive: Boolean,
     shouldAskForMicrophonePermission: Boolean,
     onMicrophonePermissionFlowDone: () -> Unit,
     activity: Activity,
@@ -147,7 +136,7 @@ fun HomeScreen(
         ) {
             GreetingText(
                 modifier = Modifier
-                    .padding(top = 30.dp)
+                    .padding(top = 16.dp)
             )
             Spacer(
                 modifier = Modifier.weight(1f)
@@ -182,8 +171,9 @@ fun GreetingText(
     BasicText(
         text = stringResource(R.string.welcome),
         style = TextStyle(
-            fontSize = 30.sp,
-            color = Color.White
+            fontSize = 24.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
         ),
         modifier = modifier
     )
@@ -574,7 +564,7 @@ private fun BoxScope.StartServiceButton(
 
 @Composable
 fun GradientBackgroundScreen(
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -592,80 +582,7 @@ fun GradientBackgroundScreen(
     }
 }
 
-//@Composable
-//fun ActivateServiceButton(
-//    modifier: Modifier = Modifier,
-//    onClick: () -> Unit = {}
-//) {
-//    Box(
-//        modifier = modifier
-//            .padding(top = 30.dp)
-//            .size(200.dp)
-//    ) {
-//        Canvas(modifier = Modifier.matchParentSize()) {
-//            val gradient = Brush.radialGradient(
-//                colors = listOf(
-//                    ActivateButtonColor.copy(alpha = 0.5f),
-//                    Color.Transparent
-//                ),
-//                center = Offset(size.width / 2, size.height / 2),
-//                radius = size.width / 2
-//            )
-//            drawCircle(
-//                brush = gradient,
-//                center = Offset(size.width / 2, size.height / 2),
-//                radius = size.width / 2
-//            )
-//        }
-//
-//        Button(
-//            onClick = onClick,
-//            modifier = Modifier
-//                .align(Alignment.Center)
-//                .size(100.dp),
-//            shape = CircleShape,
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = ActivateButtonColor,
-//                contentColor = Color.White
-//            ),
-//            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
-//        ) {
-//            Icon(
-//                Icons.Default.PlayArrow, contentDescription = "Activate Service",
-//                modifier = modifier.size(40.dp)
-//            )
-//        }
-//    }
-//}
 
-
-@Composable
-fun PauseForDuration(
-    duration: Int,
-    onDurationChange: (Int) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .padding(top = 24.dp)
-    ) {
-        Text(
-            text = "Pause for $duration seconds",
-            fontSize = 20.sp,
-            modifier = Modifier
-                .padding(bottom = 8.dp)
-        )
-        Slider(
-            value = duration.toFloat(),
-            onValueChange = { newValue ->
-                onDurationChange(newValue.toInt())
-            },
-            valueRange = 1f..10f,
-            steps = 9,
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-        )
-    }
-}
 
 @Composable
 fun MicrophonePermissionDialog(
@@ -713,148 +630,32 @@ fun MicrophonePermissionDialog(
 }
 
 @Composable
-fun RemoveUnusedAppPermissionButton(
-    activity: Activity
-) {
-    Button(
-        onClick = {
-            val intent = Intent()
-            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            val uri = Uri.fromParts("package", activity.packageName, null)
-            intent.data = uri
-            activity.startActivity(intent)
-        },
-
-        modifier = Modifier.padding(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            Color.Green
-        ),
-    ) {
-        Text(
-            text = "Remove Unused App Permission",
-            color = Color.White,
-            style = TextStyle(fontWeight = FontWeight.Bold)
-        )
-    }
-}
-
-@Composable
-fun BypassDoNotDisturbButton(
-    onActivationClick: () -> Unit,
-    isActive: Boolean
-) {
-    Button(
-        onClick = {
-            onActivationClick()
-        },
-
-        modifier = Modifier.padding(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isActive) {
-                Color.Red
-            } else {
-                Color.Green
-            }
-        ),
-    ) {
-        Text(
-            text = if (isActive) "Deactivate Bypass DND" else "Activate Bypass DND",
-            color = Color.White,
-            style = TextStyle(fontWeight = FontWeight.Bold)
-        )
-    }
-}
-
-@Composable
-fun ActivationButton(
-    onActivationClick: () -> Unit,
-    isActive: Boolean
-) {
-    Button(
-        onClick = {
-            onActivationClick()
-        },
-
-        modifier = Modifier.padding(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isActive) {
-                Color.Red
-            } else {
-                Color.Green
-            }
-        ),
-    ) {
-        Text(
-            text = if (isActive) "Deactivate" else "Activate",
-            color = Color.White,
-            style = TextStyle(fontWeight = FontWeight.Bold)
-        )
-    }
-}
-
-@Composable
-fun SensitivitySlider(
-    sensitivity: Int,
-    onSensitivityChange: (Int) -> Unit
+fun PauseForDuration(
+    duration: Int,
+    onDurationChange: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
-            .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = 24.dp)
     ) {
-        Text("Sensitivity $sensitivity")
-        Slider(
-            value = sensitivity.toFloat(),
-            onValueChange = { newValue ->
-                onSensitivityChange(newValue.toInt())
-            },
-            valueRange = 5f..100f,
-            steps = 100
+        Text(
+            text = "Pause for $duration seconds",
+            fontSize = 20.sp,
+            modifier = Modifier
+                .padding(bottom = 8.dp)
         )
-    }
-}
-
-@Composable
-fun VolumeSlider(
-    volume: Int,
-    onVolumeChange: (Int) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Volume $volume")
         Slider(
-            value = volume.toFloat(),
+            value = duration.toFloat(),
             onValueChange = { newValue ->
-                onVolumeChange(newValue.toInt())
-            },
-            valueRange = 0f..100f,
-            steps = 100
-        )
-    }
-}
-
-@Composable
-fun SongDurationSlider(
-    songDuration: Int,
-    onSongDurationChange: (Int) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .padding(top = 10.dp, bottom = 10.dp, start = 30.dp, end = 30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Song Duration $songDuration seconds")
-        Slider(
-            value = songDuration.toFloat(),
-            onValueChange = { newValue ->
-                onSongDurationChange(newValue.toInt())
+                onDurationChange(newValue.toInt())
             },
             valueRange = 1f..10f,
-            steps = 9
+            steps = 9,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
         )
     }
 }
+
+
 

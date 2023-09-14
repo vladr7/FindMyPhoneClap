@@ -1,5 +1,6 @@
 package com.riviem.findmyphoneclap.core.constants
 
+
 object Constants {
 
     const val SONG_DURATION_DEFAULT_VALUE: Long = 3000L

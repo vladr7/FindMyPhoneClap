@@ -46,12 +46,15 @@ class AudioClassificationServiceImpl @Inject constructor(
     }
 
     private suspend fun onServiceBound() {
+        println("vladlog: ${settingsRepository.getCurrentSoundId()}")
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(
             sensitivity = settingsRepository.getSensitivity(),
             volume = settingsRepository.getVolume(),
             songDuration = settingsRepository.getSongDuration(),
-            isBypassDNDPermissionEnabled = settingsRepository.getBypassDoNotDisturbPermissionEnabled()
+            isBypassDNDPermissionEnabled = settingsRepository.getBypassDoNotDisturbPermissionEnabled(),
+            currentSoundId = settingsRepository.getCurrentSoundId()
         )
+        setCurrentSoundId(settingsRepository.getCurrentSoundId())
     }
 
     override fun stopService() {
@@ -71,18 +74,39 @@ class AudioClassificationServiceImpl @Inject constructor(
     }
 
     override fun setVolume(volume: Int) {
+        if (!bound) {
+            return
+        }
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(volume = volume)
     }
 
     override fun setSongDuration(songDurationMillis: Long) {
+        if (!bound) {
+            return
+        }
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(songDuration = songDurationMillis)
     }
 
     override fun setBypassDNDPermissionEnabled(isEnabled: Boolean) {
+        if (!bound) {
+            return
+        }
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(isBypassDNDPermissionEnabled = isEnabled)
     }
 
     override suspend fun pauseServiceForDuration(durationMillis: Long) {
+        if (!bound) {
+            return
+        }
         audioTFLite.pauseServiceForDuration(durationMillis)
+    }
+
+    override fun setCurrentSoundId(soundId: Int) {
+        if (!bound) {
+            return
+        }
+        audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(currentSoundId = soundId)
+        audioTFLite.clearMediaPlayer()
+        audioTFLite.createMediaPlayer(currentSound = soundId)
     }
 }
