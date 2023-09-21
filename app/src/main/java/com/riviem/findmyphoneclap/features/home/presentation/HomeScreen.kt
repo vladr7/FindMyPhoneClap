@@ -15,14 +15,18 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -36,6 +40,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -152,6 +157,10 @@ fun HomeScreen(
             )
             Spacer(
                 modifier = Modifier.weight(1f)
+            )
+            PauseForDuration(
+                duration = pauseDuration,
+                onDurationChange = onPauseDurationChange
             )
         }
     }
@@ -583,7 +592,6 @@ fun GradientBackgroundScreen(
 }
 
 
-
 @Composable
 fun MicrophonePermissionDialog(
     context: Context,
@@ -657,5 +665,35 @@ fun PauseForDuration(
     }
 }
 
-
+@Composable
+fun NewPauseForDuration(
+    modifier: Modifier = Modifier,
+    duration: Int,
+    onDurationChange: (Int) -> Unit,
+    activated: Boolean,
+    onActivatedClicked: (Boolean) -> Unit
+) {
+    Column {
+        Text(
+            text = "Pause Service",
+            fontSize = 20.sp,
+        )
+        Text(
+            text = "Pause for the next $duration minutes",
+            fontSize = 14.sp,
+        )
+        Row(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row() {
+//                TextField(value = duration, onValueChange = { onDurationChange(it) })
+                Text(text = "minutes")
+            }
+//            Image(painter =, contentDescription =)
+        }
+    }
+}
 
