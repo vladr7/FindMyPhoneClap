@@ -689,10 +689,10 @@ fun NewPauseForDuration(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row() {
-                TextField(value = duration, onValueChange = { onDurationChange(it) })
+//                TextField(value = duration, onValueChange = { onDurationChange(it) })
                 Text(text = "minutes")
             }
-            Image(painter =, contentDescription =)
+//            Image(painter =, contentDescription =)
         }
     }
 }
