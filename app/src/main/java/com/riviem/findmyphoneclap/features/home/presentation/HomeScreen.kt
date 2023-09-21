@@ -158,10 +158,10 @@ fun HomeScreen(
             Spacer(
                 modifier = Modifier.weight(1f)
             )
-            PauseForDuration(
-                duration = pauseDuration,
-                onDurationChange = onPauseDurationChange
-            )
+//            PauseForDuration(
+//                duration = pauseDuration,
+//                onDurationChange = onPauseDurationChange
+//            )
         }
     }
     if (shouldAskForMicrophonePermission) {
