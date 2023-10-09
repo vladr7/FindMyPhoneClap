@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FindMyPhoneClap</string>
+    <string name="app_name">2ClapsAway</string>
     <string name="welcome">Welcome!</string>
     <string name="activating_mute_override_please_wait_a_few_seconds">Activating Mute Override, please wait a few seconds...</string>
 </resources>
