@@ -82,8 +82,8 @@ class AudioTFLite @Inject constructor() : Service() {
             this,
             CHANNEL_ID
         )
-            .setContentTitle("Audio Classification Service")
-            .setContentText("Classifying audio...")
+            .setContentTitle("2ClapsAway")
+            .setContentText("Clap detection is running")
             .setSmallIcon(R.drawable.ic_launcher_background)
             .build()
         if (!isServiceRunning) {
