@@ -11,6 +11,7 @@ import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.riviem.findmyphoneclap.R
@@ -118,6 +119,9 @@ class AudioTFLite @Inject constructor() : Service() {
         }
         while (secondsCounter < nrOfSecondsToListen) {
             delay(1000L)
+            if (secondsCounter % 300 == 0L) {
+                restartRecording()
+            }
             secondsCounter++
             tensorAudio.load(audioRecord)
             val listOfClassification: List<Classifications> = audioClassifier.classify(tensorAudio)
@@ -134,6 +138,13 @@ class AudioTFLite @Inject constructor() : Service() {
         }
         audioRecord.stop()
         stopSelf()
+    }
+
+    private fun restartRecording() {
+        audioRecord.stop()
+        audioRecord.release()
+        audioRecord = audioClassifier.createAudioRecord()
+        audioRecord.startRecording()
     }
 
     private fun shouldPlaySound(category: Category): Boolean {
