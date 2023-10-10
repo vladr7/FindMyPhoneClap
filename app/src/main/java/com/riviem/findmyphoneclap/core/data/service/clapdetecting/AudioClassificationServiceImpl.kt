@@ -46,7 +46,6 @@ class AudioClassificationServiceImpl @Inject constructor(
     }
 
     private suspend fun onServiceBound() {
-        println("vladlog: ${settingsRepository.getCurrentSoundId()}")
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(
             sensitivity = settingsRepository.getSensitivity(),
             volume = settingsRepository.getVolume(),
