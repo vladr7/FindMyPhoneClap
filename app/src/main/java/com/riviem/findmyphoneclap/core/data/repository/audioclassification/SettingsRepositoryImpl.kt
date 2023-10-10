@@ -127,7 +127,7 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun getCurrentSoundId(): Int {
         return localStorage.getInt(
             LocalStorageKeys.CURRENT_SOUND_ID,
-            R.raw.birdwhistle
+            R.raw.ringtone2
         )
     }
 }
