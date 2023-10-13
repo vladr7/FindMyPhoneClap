@@ -20,16 +20,25 @@ import com.riviem.findmyphoneclap.navigation.MainNavigation
 import com.riviem.findmyphoneclap.ui.theme.FindMyPhoneClapTheme
 import dagger.hilt.android.AndroidEntryPoint
 import android.Manifest
+import android.content.Intent
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepositoryImpl.Companion.MY_PERMISSIONS_REQUEST_RECORD_AUDIO
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    private lateinit var appUpdateManager: AppUpdateManager
+    private val updateType = AppUpdateType.IMMEDIATE
+
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        askForMicrophonePermission()
+        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
+        checkForAppUpdate()
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
@@ -50,25 +59,50 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-//    private fun askForMicrophonePermission() {
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
-//                AlertDialog.Builder(this)
-//                    .setTitle("Permisiune necesară")
-//                    .setMessage("Această aplicație are nevoie de permisiunea de a înregistra audio pentru a funcționa corect.")
-//                    .setPositiveButton("OK") { _, _ ->
-//                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), MY_PERMISSIONS_REQUEST_RECORD_AUDIO)
-//                    }
-//                    .create()
-//                    .show()
-//            } else {
-//                // Dacă nu este nevoie de o explicație, cerem direct permisiunea
-//                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), MY_PERMISSIONS_REQUEST_RECORD_AUDIO)
-//            }
-//        } else {
-//            // Permisiunea a fost deja acordată, puteți continua cu funcționalitatea ce depinde de această permisiune
-//        }
-//
-//    }
+    private fun checkForAppUpdate() {
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            val isUpdateAvailable =
+                appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+            if (isUpdateAvailable) {
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    updateType,
+                    this,
+                    APP_UPDATE_REQUEST_CODE
+                )
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability()
+                == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
+            ) {
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    updateType,
+                    this,
+                    APP_UPDATE_REQUEST_CODE
+                )
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == APP_UPDATE_REQUEST_CODE) {
+            if (resultCode != RESULT_OK) {
+                println("Update flow failed! Result code: $resultCode")
+            } else {
+                println("Update flow complete! Result code: $resultCode")
+            }
+        }
+    }
+
+    companion object {
+        private const val APP_UPDATE_REQUEST_CODE = 9001
+    }
 }
 
