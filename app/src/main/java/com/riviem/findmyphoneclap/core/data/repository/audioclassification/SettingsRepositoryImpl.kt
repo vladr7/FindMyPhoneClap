@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
-import com.riviem.findmyphoneclap.R
 import com.riviem.findmyphoneclap.core.constants.Constants
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorageKeys
@@ -119,15 +118,15 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setCurrentSoundId(soundId: Int) {
         localStorage.putInt(
-            LocalStorageKeys.CURRENT_SOUND_ID,
+            LocalStorageKeys.CURRENT_SOUND_ID_KEY,
             soundId
         )
     }
 
     override suspend fun getCurrentSoundId(): Int {
         return localStorage.getInt(
-            LocalStorageKeys.CURRENT_SOUND_ID,
-            R.raw.ringtone2
+            LocalStorageKeys.CURRENT_SOUND_ID_KEY,
+            Constants.DEFAULT_PLAYING_SONG
         )
     }
 }

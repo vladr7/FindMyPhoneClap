@@ -323,8 +323,8 @@ fun SongDurationSlider(
                 onValueChange = { newValue ->
                     onSongDurationChange(newValue.toInt())
                 },
-                valueRange = 1f..10f,
-                steps = 9,
+                valueRange = 1f..5f,
+                steps = 5,
                 colors = SliderColors(
                     thumbColor = SettingsActivateSwitchButtonColor,
                     activeTrackColor = SettingsActivateSwitchButtonColor,
