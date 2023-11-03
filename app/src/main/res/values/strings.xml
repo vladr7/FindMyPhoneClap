@@ -1,5 +1,16 @@
 <resources>
     <string name="app_name">2ClapsAway</string>
     <string name="welcome">Welcome!</string>
-    <string name="activating_mute_override_please_wait_a_few_seconds">Activating Mute Override, please wait a few seconds...</string>
+    <string name="activating_mute_override_please_wait_a_few_seconds">Activating Mute Override, please wait a few seconds…</string>
+    <string name="microphone_permission_required_to_use_this_app">Microphone Permission required to use this app</string>
+    <string name="cancel">Cancel</string>
+    <string name="override_mute">Override Mute</string>
+    <string name="play_sound_even_if_phone_is_muted">Play sound even if phone is muted</string>
+    <string name="whistle">Whistle</string>
+    <string name="find_phone_by_whistling">Find phone by whistling</string>
+    <string name="settings">Settings</string>
+    <string name="remove_unused_app_permission">Remove Unused App Permission</string>
+    <string name="play_sound_duration_seconds">Play sound Duration %1$s seconds</string>
+    <string name="play_sound_duration_second">Play sound Duration %1$s second</string>
+    <string name="choose_sound">Choose sound: %1$s</string>
 </resources>

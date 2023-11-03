@@ -609,8 +609,8 @@ fun MicrophonePermissionDialog(
             )
         ) {
             AlertDialog2Buttons(
-                title = "Microphone Permission required to use this app",
-                dismissText = "Cancel",
+                title = stringResource(R.string.microphone_permission_required_to_use_this_app),
+                dismissText = stringResource(R.string.cancel),
                 confirmText = "OK",
                 onDismissClick = onMicrophonePermissionDismissed,
                 onConfirmClick = {

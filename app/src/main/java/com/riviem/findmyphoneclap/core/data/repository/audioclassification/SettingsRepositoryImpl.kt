@@ -146,7 +146,6 @@ class SettingsRepositoryImpl @Inject constructor(
         )
         val labelsSet = labelsString?.split(",")?.toSet()
         val labels = labelsSet?.mapNotNull { Label.values().find { label -> label.name == it } }?.toSet() ?: emptySet()
-        // add clapping label
         return labels + Label.CLAPPING
     }
 

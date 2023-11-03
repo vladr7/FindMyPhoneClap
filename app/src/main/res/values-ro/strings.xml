@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">2ClapsAway</string>
+    <string name="welcome">Bun venit!</string>
+    <string name="activating_mute_override_please_wait_a_few_seconds">Activare Suprascriere Mute, vă rugăm așteptați câteva secunde...</string>
+    <string name="microphone_permission_required_to_use_this_app">Permisiunea pentru microfon este necesară pentru utilizarea acestei aplicații</string>
+    <string name="cancel">Anulează</string>
+    <string name="override_mute">Suprascrie Mute</string>
+    <string name="play_sound_even_if_phone_is_muted">Redă sunetul chiar dacă telefonul este pe modul silențios</string>
+    <string name="whistle">Fluier</string>
+    <string name="find_phone_by_whistling">Găsește telefonul fluierând</string>
+    <string name="settings">Setări</string>
+    <string name="remove_unused_app_permission">Revocă permisiunile neutilizate ale aplicației</string>
+    <string name="play_sound_duration_seconds">Durata de redare a sunetului %1$s secunde</string>
+    <string name="play_sound_duration_second">Durata de redare a sunetului %1$s secundă</string>
+    <string name="choose_sound">Alegeți sunetul: %1$s</string>
+</resources>

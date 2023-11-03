@@ -140,8 +140,8 @@ fun SettingsScreen(
                     onBypassDoNotDisturbClick()
                 },
                 modifier = Modifier,
-                title = "Override Mute",
-                subtitle = "Play sound even if phone is muted",
+                title = stringResource(R.string.override_mute),
+                subtitle = stringResource(R.string.play_sound_even_if_phone_is_muted),
                 startIcon = Icons.Default.VolumeUp,
                 startIconColor = SettingsVolumeIconColor,
             )
@@ -164,8 +164,8 @@ fun SettingsScreen(
                     onWhistleClick()
                 },
                 modifier = Modifier,
-                title = "Whistle",
-                subtitle = "Find phone by whistling",
+                title = stringResource(R.string.whistle),
+                subtitle = stringResource(R.string.find_phone_by_whistling),
                 startIcon = Icons.Default.RecordVoiceOver,
                 startIconColor = SettingsVolumeIconColor,
             )
@@ -189,7 +189,7 @@ fun SettingsTitle(
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Settings",
+            text = stringResource(R.string.settings),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             modifier = modifier
@@ -339,7 +339,7 @@ fun RemoveUnusedAppPermissionButton(
         ),
     ) {
         Text(
-            text = "Remove Unused App Permission",
+            text = stringResource(R.string.remove_unused_app_permission),
             color = Color.White,
             style = TextStyle(fontWeight = FontWeight.Bold)
         )
@@ -370,7 +370,10 @@ fun SongDurationSlider(
             verticalArrangement = Arrangement.SpaceAround,
         ) {
             Text(
-                text = if (songDuration != 1) "Play sound Duration $songDuration seconds" else "Play sound Duration $songDuration second",
+                text = if (songDuration != 1) stringResource(
+                    R.string.play_sound_duration_seconds,
+                    songDuration
+                ) else stringResource(R.string.play_sound_duration_second, songDuration),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
@@ -444,7 +447,7 @@ fun ChooseSoundSlider(
             verticalArrangement = Arrangement.SpaceAround,
         ) {
             Text(
-                text = "Choose sound: ${currentSound.title}",
+                text = stringResource(R.string.choose_sound, currentSound.title),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
