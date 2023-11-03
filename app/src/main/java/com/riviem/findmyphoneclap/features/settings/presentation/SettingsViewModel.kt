@@ -2,13 +2,17 @@ package com.riviem.findmyphoneclap.features.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.riviem.findmyphoneclap.core.data.service.clapdetecting.Label
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import com.riviem.findmyphoneclap.features.home.domain.usecase.AskForBypassDNDPermissionUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.ClearLabelsUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.GetCurrentSoundUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.GetLabelsUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.GetSongDurationUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.HasBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetBypassDNDPermissionUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetCurrentSoundUseCase
+import com.riviem.findmyphoneclap.features.home.domain.usecase.SetLabelsUseCase
 import com.riviem.findmyphoneclap.features.home.domain.usecase.SetSongDurationUseCase
 import com.riviem.findmyphoneclap.features.settings.enums.ChooseSound
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +30,10 @@ class SettingsViewModel @Inject constructor(
     private val getSongDurationUseCase: GetSongDurationUseCase,
     private val askForBypassDNDPermissionUseCase: AskForBypassDNDPermissionUseCase,
     private val getCurrentSoundUseCase: GetCurrentSoundUseCase,
-    private val setCurrentSoundUseCase: SetCurrentSoundUseCase
+    private val setCurrentSoundUseCase: SetCurrentSoundUseCase,
+    private val getLabelsUseCase: GetLabelsUseCase,
+    private val setLabelsUseCase: SetLabelsUseCase,
+    private val clearLabelsUseCase: ClearLabelsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<SettingsViewState>(SettingsViewState())
@@ -36,6 +43,20 @@ class SettingsViewModel @Inject constructor(
         initBypassDNDState()
         initSongDuration()
         initCurrentSound()
+        initLabels()
+    }
+
+    private fun initLabels() {
+        viewModelScope.launch {
+            val labels = getLabelsUseCase.execute()
+            val whistleLabels = listOf<Label>(
+                Label.WHISTLE,
+                Label.WHISTLING,
+            )
+            _state.update {
+                it.copy(isWhistleActive = labels.containsAll(whistleLabels))
+            }
+        }
     }
 
     private fun initCurrentSound() {
@@ -125,6 +146,25 @@ class SettingsViewModel @Inject constructor(
             it.copy(showBypassDNDToast = false)
         }
     }
+
+    fun onWhistleClick() {
+        viewModelScope.launch {
+            val labels = getLabelsUseCase.execute()
+            val whistleLabels = setOf<Label>(
+                Label.WHISTLE,
+                Label.WHISTLING,
+            )
+            if (labels.containsAll(whistleLabels)) {
+                clearLabelsUseCase.execute(whistleLabels)
+            } else {
+                setLabelsUseCase.execute(whistleLabels)
+            }
+            val newLabels = getLabelsUseCase.execute()
+            _state.update {
+                it.copy(isWhistleActive = newLabels.containsAll(whistleLabels))
+            }
+        }
+    }
 }
 
 
@@ -134,5 +174,6 @@ data class SettingsViewState(
     val isBypassDNDActive: Boolean = false,
     val pauseDuration: Int = 0,
     val showBypassDNDToast: Boolean = false,
-    val currentSound: ChooseSound = ChooseSound.SOUND_1
+    val currentSound: ChooseSound = ChooseSound.SOUND_1,
+    val isWhistleActive: Boolean = false
 )

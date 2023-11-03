@@ -11,7 +11,6 @@ import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.riviem.findmyphoneclap.R
@@ -149,7 +148,9 @@ class AudioTFLite @Inject constructor() : Service() {
 
     private fun shouldPlaySound(category: Category): Boolean {
         val userScore = convertSensitivityToScore(serviceSettings.sensitivity)
-        return category.label == Labels.CLAPPING.stringValue &&
+        println("vladlog: labels: ${serviceSettings.labels}")
+        val isLabelEnabled = serviceSettings.labels.contains(Label.fromString(category.label))
+        return isLabelEnabled &&
                 category.score > userScore
     }
 

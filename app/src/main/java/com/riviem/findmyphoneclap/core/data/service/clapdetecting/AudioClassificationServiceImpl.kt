@@ -6,9 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.riviem.findmyphoneclap.core.data.repository.audioclassification.SettingsRepository
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
@@ -51,7 +49,8 @@ class AudioClassificationServiceImpl @Inject constructor(
             volume = settingsRepository.getVolume(),
             songDuration = settingsRepository.getSongDuration(),
             isBypassDNDPermissionEnabled = settingsRepository.getBypassDoNotDisturbPermissionEnabled(),
-            currentSoundId = settingsRepository.getCurrentSoundId()
+            currentSoundId = settingsRepository.getCurrentSoundId(),
+            labels = settingsRepository.getLabels()
         )
         setCurrentSoundId(settingsRepository.getCurrentSoundId())
     }
@@ -107,5 +106,23 @@ class AudioClassificationServiceImpl @Inject constructor(
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(currentSoundId = soundId)
         audioTFLite.clearMediaPlayer()
         audioTFLite.createMediaPlayer(currentSound = soundId)
+    }
+
+    override fun setLabels(setOfLabels: Set<Label>) {
+        if (!bound) {
+            return
+        }
+        val newLabels = audioTFLite.serviceSettings.labels.toMutableSet()
+        newLabels.addAll(setOfLabels)
+        audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(labels = newLabels)
+    }
+
+    override fun clearLabels(setOfLabels: Set<Label>) {
+        if (!bound) {
+            return
+        }
+        val newLabels = audioTFLite.serviceSettings.labels.toMutableSet()
+        newLabels.removeAll(setOfLabels)
+        audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(labels = newLabels)
     }
 }

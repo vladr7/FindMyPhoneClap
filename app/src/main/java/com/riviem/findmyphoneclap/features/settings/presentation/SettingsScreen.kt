@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -100,7 +101,11 @@ fun SettingsRoute(
         currentSound = state.currentSound,
         onSoundChange = { newValue ->
             viewModel.onCurrentSoundChange(newValue)
-        }
+        },
+        isWhistleActive = state.isWhistleActive,
+        onWhistleClick = {
+            viewModel.onWhistleClick()
+        },
     )
 }
 
@@ -117,6 +122,8 @@ fun SettingsScreen(
     onBypassDNDToastShown: () -> Unit,
     currentSound: ChooseSound,
     onSoundChange: (Int) -> Unit,
+    isWhistleActive: Boolean,
+    onWhistleClick: () -> Unit,
 ) {
     GradientBackgroundScreen {
         Column(
@@ -151,6 +158,17 @@ fun SettingsScreen(
                 onSoundChange = onSoundChange,
                 songDuration = songDuration,
             )
+            SettingsActivateWhistle(
+                activated = isWhistleActive,
+                onClick = {
+                    onWhistleClick()
+                },
+                modifier = Modifier,
+                title = "Whistle",
+                subtitle = "Find phone by whistling",
+                startIcon = Icons.Default.RecordVoiceOver,
+                startIconColor = SettingsVolumeIconColor,
+            )
         }
     }
     LaunchedEffect(key1 = showBypassDNDToast) {
@@ -180,6 +198,27 @@ fun SettingsTitle(
 }
 
 @Composable
+fun SettingsActivateWhistle(
+    modifier: Modifier = Modifier,
+    activated: Boolean,
+    onClick: () -> Unit,
+    title: String,
+    subtitle: String,
+    startIcon: ImageVector,
+    startIconColor: Color,
+) {
+    SettingToggle(
+        modifier,
+        startIcon,
+        startIconColor,
+        title,
+        subtitle,
+        activated,
+        onClick
+    )
+}
+
+@Composable
 fun SettingsActivateButton(
     modifier: Modifier = Modifier,
     activated: Boolean,
@@ -189,7 +228,27 @@ fun SettingsActivateButton(
     startIcon: ImageVector,
     startIconColor: Color,
 ) {
+    SettingToggle(
+        modifier,
+        startIcon,
+        startIconColor,
+        title,
+        subtitle,
+        activated,
+        onClick
+    )
+}
 
+@Composable
+private fun SettingToggle(
+    modifier: Modifier,
+    startIcon: ImageVector,
+    startIconColor: Color,
+    title: String,
+    subtitle: String,
+    activated: Boolean,
+    onClick: () -> Unit
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()

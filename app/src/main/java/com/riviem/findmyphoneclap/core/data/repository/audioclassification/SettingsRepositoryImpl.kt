@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.riviem.findmyphoneclap.core.constants.Constants
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorage
 import com.riviem.findmyphoneclap.core.data.datasource.local.LocalStorageKeys
+import com.riviem.findmyphoneclap.core.data.service.clapdetecting.Label
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 import java.io.File
 import java.text.SimpleDateFormat
@@ -128,5 +129,30 @@ class SettingsRepositoryImpl @Inject constructor(
             LocalStorageKeys.CURRENT_SOUND_ID_KEY,
             Constants.DEFAULT_PLAYING_SONG
         )
+    }
+
+    override suspend fun setLabels(setOfLabels: Set<Label>) {
+        val labels = (setOfLabels + Label.CLAPPING).joinToString(separator = ",") { it.name }
+        localStorage.putString(
+            LocalStorageKeys.LABELS_KEY,
+            labels
+        )
+    }
+
+    override suspend fun getLabels(): Set<Label> {
+        val labelsString = localStorage.getString(
+            LocalStorageKeys.LABELS_KEY,
+            ""
+        )
+        val labelsSet = labelsString?.split(",")?.toSet()
+        val labels = labelsSet?.mapNotNull { Label.values().find { label -> label.name == it } }?.toSet() ?: emptySet()
+        // add clapping label
+        return labels + Label.CLAPPING
+    }
+
+    override suspend fun clearLabels(setOfLabels: Set<Label>) {
+        val labels = getLabels().toMutableSet()
+        labels.removeAll(setOfLabels)
+        setLabels(labels)
     }
 }

@@ -1,5 +1,6 @@
 package com.riviem.findmyphoneclap.core.data.repository.audioclassification
 
+import com.riviem.findmyphoneclap.core.data.service.clapdetecting.Label
 import com.riviem.findmyphoneclap.features.home.data.models.BypassDNDState
 
 interface SettingsRepository {
@@ -17,4 +18,7 @@ interface SettingsRepository {
     fun logToFile(message: String)
     suspend fun setCurrentSoundId(soundId: Int)
     suspend fun getCurrentSoundId(): Int
+    suspend fun setLabels(setOfLabels: Set<Label>)
+    suspend fun getLabels(): Set<Label>
+    suspend fun clearLabels(setOfLabels: Set<Label>)
 }

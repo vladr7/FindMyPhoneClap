@@ -11,4 +11,6 @@ interface AudioClassificationService {
     fun setBypassDNDPermissionEnabled(isEnabled: Boolean)
     suspend fun pauseServiceForDuration(durationMillis: Long)
     fun setCurrentSoundId(soundId: Int)
+    fun setLabels(setOfLabels: Set<Label>)
+    fun clearLabels(setOfLabels: Set<Label>)
 }

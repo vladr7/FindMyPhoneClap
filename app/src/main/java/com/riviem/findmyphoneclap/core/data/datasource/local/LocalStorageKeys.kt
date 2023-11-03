@@ -2,6 +2,7 @@ package com.riviem.findmyphoneclap.core.data.datasource.local
 
 object LocalStorageKeys {
 
+    const val LABELS_KEY  = "labels_key"
     const val CURRENT_SOUND_ID_KEY = "current_sound_id_key"
     const val SONG_DURATION = "song_duration"
     const val SENSITIVITY = "sensitivity"
