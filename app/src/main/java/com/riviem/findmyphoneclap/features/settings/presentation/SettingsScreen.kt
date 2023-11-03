@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.Switch
@@ -65,10 +65,7 @@ import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchButtonColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchIconColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsInactiveSwitchTrackColor
 import com.riviem.findmyphoneclap.ui.theme.SettingsVolumeIconColor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -134,7 +131,7 @@ fun SettingsScreen(
             SettingsTitle(
                 modifier = Modifier
             )
-            SettingsActivateButton(
+            SettingsActivateMuteButton(
                 activated = isBypassDNDActive,
                 onClick = {
                     onBypassDoNotDisturbClick()
@@ -158,6 +155,7 @@ fun SettingsScreen(
                 onSoundChange = onSoundChange,
                 songDuration = songDuration,
             )
+            Spacer(modifier = Modifier.height(20.dp))
             SettingsActivateWhistle(
                 activated = isWhistleActive,
                 onClick = {
@@ -219,7 +217,7 @@ fun SettingsActivateWhistle(
 }
 
 @Composable
-fun SettingsActivateButton(
+fun SettingsActivateMuteButton(
     modifier: Modifier = Modifier,
     activated: Boolean,
     onClick: () -> Unit,
@@ -252,7 +250,7 @@ private fun SettingToggle(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(110.dp)
+            .heightIn(min = 110.dp, max = 160.dp)
             .border(
                 1.dp,
                 Color.Gray.copy(alpha = 0.7f),
@@ -287,7 +285,7 @@ private fun SettingToggle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 2
+                maxLines = 3
             )
         }
 
