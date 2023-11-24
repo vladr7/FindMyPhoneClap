@@ -148,7 +148,6 @@ class AudioTFLite @Inject constructor() : Service() {
 
     private fun shouldPlaySound(category: Category): Boolean {
         val userScore = convertSensitivityToScore(serviceSettings.sensitivity)
-        println("vladlog: labels: ${serviceSettings.labels}")
         val isLabelEnabled = serviceSettings.labels.contains(Label.fromString(category.label))
         return isLabelEnabled &&
                 category.score > userScore

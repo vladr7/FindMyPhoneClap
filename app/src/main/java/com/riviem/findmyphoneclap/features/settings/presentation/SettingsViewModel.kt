@@ -54,7 +54,10 @@ class SettingsViewModel @Inject constructor(
                 Label.WHISTLING,
             )
             _state.update {
-                it.copy(isWhistleActive = labels.containsAll(whistleLabels))
+                it.copy(
+                    isWhistleActive = labels.containsAll(whistleLabels),
+                    isClappingActive = labels.contains(Label.CLAPPING)
+                )
             }
         }
     }
@@ -147,21 +150,35 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun onWhistleClick() {
+    fun onWhistleClick(checked: Boolean) {
         viewModelScope.launch {
-            val labels = getLabelsUseCase.execute()
             val whistleLabels = setOf<Label>(
                 Label.WHISTLE,
                 Label.WHISTLING,
             )
-            if (labels.containsAll(whistleLabels)) {
-                clearLabelsUseCase.execute(whistleLabels)
-            } else {
+            if(checked) {
                 setLabelsUseCase.execute(whistleLabels)
+            } else {
+                clearLabelsUseCase.execute(whistleLabels)
             }
-            val newLabels = getLabelsUseCase.execute()
             _state.update {
-                it.copy(isWhistleActive = newLabels.containsAll(whistleLabels))
+                it.copy(isWhistleActive = checked)
+            }
+        }
+    }
+
+    fun onClappingClick(checked: Boolean) {
+        viewModelScope.launch {
+            val clappingLabel = setOf<Label>(
+                Label.CLAPPING,
+            )
+            if(checked) {
+                setLabelsUseCase.execute(clappingLabel)
+            } else {
+                clearLabelsUseCase.execute(clappingLabel)
+            }
+            _state.update {
+                it.copy(isClappingActive = checked)
             }
         }
     }
@@ -175,5 +192,6 @@ data class SettingsViewState(
     val pauseDuration: Int = 0,
     val showBypassDNDToast: Boolean = false,
     val currentSound: ChooseSound = ChooseSound.SOUND_1,
-    val isWhistleActive: Boolean = false
+    val isWhistleActive: Boolean = false,
+    val isClappingActive: Boolean = false,
 )

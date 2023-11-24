@@ -13,4 +13,6 @@
     <string name="play_sound_duration_seconds">Play sound Duration %1$s seconds</string>
     <string name="play_sound_duration_second">Play sound Duration %1$s second</string>
     <string name="choose_sound">Choose sound: %1$s</string>
+    <string name="clap">Clap</string>
+    <string name="find_phone_by_clapping">Find phone by clapping</string>
 </resources>

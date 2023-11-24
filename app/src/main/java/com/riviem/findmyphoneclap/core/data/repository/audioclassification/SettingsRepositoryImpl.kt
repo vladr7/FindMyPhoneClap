@@ -88,11 +88,11 @@ class SettingsRepositoryImpl @Inject constructor(
         if (!notificationManager.isNotificationPolicyAccessGranted) {
             return BypassDNDState.DISABLED_FROM_SYSTEM
         }
-        val localStorageValue =  localStorage.getBoolean(
+        val localStorageValue = localStorage.getBoolean(
             LocalStorageKeys.BYPASS_DO_NOT_DISTURB_PERMISSION_ENABLED,
             false
         )
-        if(!localStorageValue) {
+        if (!localStorageValue) {
             return BypassDNDState.DISABLED_FROM_LOCAL_STORAGE
         }
         return BypassDNDState.ENABLED
@@ -132,11 +132,12 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun setLabels(setOfLabels: Set<Label>) {
-        val labels = (setOfLabels + Label.CLAPPING).joinToString(separator = ",") { it.name }
+        val labels = (setOfLabels).joinToString(separator = ",") { it.name }
         localStorage.putString(
             LocalStorageKeys.LABELS_KEY,
             labels
         )
+        println("vladlog: settings: set -> labels: $labels")
     }
 
     override suspend fun getLabels(): Set<Label> {
@@ -145,13 +146,16 @@ class SettingsRepositoryImpl @Inject constructor(
             ""
         )
         val labelsSet = labelsString?.split(",")?.toSet()
-        val labels = labelsSet?.mapNotNull { Label.values().find { label -> label.name == it } }?.toSet() ?: emptySet()
-        return labels + Label.CLAPPING
+        val labels =
+            labelsSet?.mapNotNull { Label.values().find { label -> label.name == it } }?.toSet()
+                ?: emptySet()
+        return labels
     }
 
     override suspend fun clearLabels(setOfLabels: Set<Label>) {
-        val labels = getLabels().toMutableSet()
-        labels.removeAll(setOfLabels)
-        setLabels(labels)
+        val labels = getLabels()
+        val newLabels = labels.minus(setOfLabels)
+        println("vladlog: settings: clear -> newLabels: $newLabels")
+        setLabels(newLabels)
     }
 }

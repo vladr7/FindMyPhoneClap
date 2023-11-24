@@ -10,7 +10,7 @@ class ClearLabelsUseCase @Inject constructor(
     private val audioClassificationService: AudioClassificationService
 ) {
     suspend fun execute(labels: Set<Label>) {
-        audioClassificationService.clearLabels(setOfLabels = labels)
         settingsRepository.clearLabels(setOfLabels = labels)
+        audioClassificationService.clearLabels(setOfLabels = labels)
     }
 }

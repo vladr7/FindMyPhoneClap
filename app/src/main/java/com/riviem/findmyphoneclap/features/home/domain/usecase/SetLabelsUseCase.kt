@@ -10,7 +10,7 @@ class SetLabelsUseCase @Inject constructor(
     private val audioClassificationService: AudioClassificationService
 ) {
     suspend fun execute(setOfLabels: Set<Label>) {
-        audioClassificationService.setLabels(setOfLabels = setOfLabels)
         settingsRepository.setLabels(setOfLabels = setOfLabels)
+        audioClassificationService.setLabels(setOfLabels = setOfLabels)
     }
 }

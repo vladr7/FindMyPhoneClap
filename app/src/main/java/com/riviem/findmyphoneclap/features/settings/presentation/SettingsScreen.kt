@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.VolumeUp
@@ -101,7 +103,11 @@ fun SettingsRoute(
         },
         isWhistleActive = state.isWhistleActive,
         onWhistleClick = {
-            viewModel.onWhistleClick()
+            viewModel.onWhistleClick(it)
+        },
+        isClappingActive = state.isClappingActive,
+        onClappingClick = {
+            viewModel.onClappingClick(it)
         },
     )
 }
@@ -120,12 +126,16 @@ fun SettingsScreen(
     currentSound: ChooseSound,
     onSoundChange: (Int) -> Unit,
     isWhistleActive: Boolean,
-    onWhistleClick: () -> Unit,
+    onWhistleClick: (Boolean) -> Unit,
+    isClappingActive: Boolean,
+    onClappingClick: (Boolean) -> Unit,
 ) {
+    val scrollState = rememberScrollState()
     GradientBackgroundScreen {
         Column(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SettingsTitle(
@@ -142,7 +152,6 @@ fun SettingsScreen(
                 startIcon = Icons.Default.VolumeUp,
                 startIconColor = SettingsVolumeIconColor,
             )
-//        RemoveUnusedAppPermissionButton(activity = activity)
             Spacer(modifier = Modifier.height(20.dp))
             SongDurationSlider(
                 modifier = Modifier,
@@ -156,14 +165,26 @@ fun SettingsScreen(
                 songDuration = songDuration,
             )
             Spacer(modifier = Modifier.height(20.dp))
-            SettingsActivateWhistle(
+            SettingToggle(
                 activated = isWhistleActive,
                 onClick = {
-                    onWhistleClick()
+                    onWhistleClick(it)
                 },
                 modifier = Modifier,
                 title = stringResource(R.string.whistle),
                 subtitle = stringResource(R.string.find_phone_by_whistling),
+                startIcon = Icons.Default.RecordVoiceOver,
+                startIconColor = SettingsVolumeIconColor,
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            SettingToggle(
+                activated = isClappingActive,
+                onClick = {
+                    onClappingClick(it)
+                },
+                modifier = Modifier,
+                title = stringResource(R.string.clap),
+                subtitle = stringResource(R.string.find_phone_by_clapping),
                 startIcon = Icons.Default.RecordVoiceOver,
                 startIconColor = SettingsVolumeIconColor,
             )
@@ -196,31 +217,10 @@ fun SettingsTitle(
 }
 
 @Composable
-fun SettingsActivateWhistle(
-    modifier: Modifier = Modifier,
-    activated: Boolean,
-    onClick: () -> Unit,
-    title: String,
-    subtitle: String,
-    startIcon: ImageVector,
-    startIconColor: Color,
-) {
-    SettingToggle(
-        modifier,
-        startIcon,
-        startIconColor,
-        title,
-        subtitle,
-        activated,
-        onClick
-    )
-}
-
-@Composable
 fun SettingsActivateMuteButton(
     modifier: Modifier = Modifier,
     activated: Boolean,
-    onClick: () -> Unit,
+    onClick: (Boolean) -> Unit,
     title: String,
     subtitle: String,
     startIcon: ImageVector,
@@ -245,7 +245,7 @@ private fun SettingToggle(
     title: String,
     subtitle: String,
     activated: Boolean,
-    onClick: () -> Unit
+    onClick: (Boolean) -> Unit
 ) {
     Row(
         modifier = modifier
@@ -295,7 +295,7 @@ private fun SettingToggle(
                 .weight(0.15f)
                 .padding(end = 8.dp),
             checked = activated,
-            onCheckedChange = { onClick() },
+            onCheckedChange = { onClick(it) },
             colors = SwitchColors(
                 checkedThumbColor = SettingsActivateSwitchButtonColor,
                 checkedBorderColor = SettingsActivateSwitchButtonColor,
