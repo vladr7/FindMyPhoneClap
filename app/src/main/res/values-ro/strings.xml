@@ -13,4 +13,7 @@
     <string name="play_sound_duration_seconds">Durata de redare a sunetului %1$s secunde</string>
     <string name="play_sound_duration_second">Durata de redare a sunetului %1$s secundă</string>
     <string name="choose_sound">Alegeți sunetul: %1$s</string>
+    <string name="clap">Bate din palme</string>
+    <string name="find_phone_by_clapping">Găsește telefonul prin bătăi din palme</string>
+    <string name="at_least_one_label_must_be_active">Păstrează cel puțin o opțiune activă (bătăi din palme sau fluierat)</string>
 </resources>

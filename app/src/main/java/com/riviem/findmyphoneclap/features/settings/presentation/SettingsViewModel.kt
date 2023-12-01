@@ -159,6 +159,10 @@ class SettingsViewModel @Inject constructor(
             if(checked) {
                 setLabelsUseCase.execute(whistleLabels)
             } else {
+                if(!state.value.isClappingActive) {
+                    setAtLeastOneSoundTypeMustBeActiveToastShown(true)
+                    return@launch
+                }
                 clearLabelsUseCase.execute(whistleLabels)
             }
             _state.update {
@@ -175,11 +179,21 @@ class SettingsViewModel @Inject constructor(
             if(checked) {
                 setLabelsUseCase.execute(clappingLabel)
             } else {
+                if(!state.value.isWhistleActive) {
+                   setAtLeastOneSoundTypeMustBeActiveToastShown(true)
+                    return@launch
+                }
                 clearLabelsUseCase.execute(clappingLabel)
             }
             _state.update {
                 it.copy(isClappingActive = checked)
             }
+        }
+    }
+
+    fun setAtLeastOneSoundTypeMustBeActiveToastShown(show: Boolean) {
+        _state.update {
+            it.copy(showAtLeastOneSoundTypeMustBeActiveToast = show)
         }
     }
 }
@@ -194,4 +208,5 @@ data class SettingsViewState(
     val currentSound: ChooseSound = ChooseSound.SOUND_1,
     val isWhistleActive: Boolean = false,
     val isClappingActive: Boolean = false,
+    val showAtLeastOneSoundTypeMustBeActiveToast: Boolean = false,
 )

@@ -15,4 +15,5 @@
     <string name="choose_sound">Choose sound: %1$s</string>
     <string name="clap">Clap</string>
     <string name="find_phone_by_clapping">Find phone by clapping</string>
+    <string name="at_least_one_label_must_be_active">Please keep at least one option active (clapping or whistling)</string>
 </resources>

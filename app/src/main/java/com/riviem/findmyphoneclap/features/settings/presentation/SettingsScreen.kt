@@ -110,6 +110,12 @@ fun SettingsRoute(
             viewModel.onClappingClick(it)
         },
     )
+
+    if(state.showAtLeastOneSoundTypeMustBeActiveToast) {
+        Toast.makeText(context,
+            stringResource(R.string.at_least_one_label_must_be_active), Toast.LENGTH_LONG).show()
+        viewModel.setAtLeastOneSoundTypeMustBeActiveToastShown(false)
+    }
 }
 
 @Composable
