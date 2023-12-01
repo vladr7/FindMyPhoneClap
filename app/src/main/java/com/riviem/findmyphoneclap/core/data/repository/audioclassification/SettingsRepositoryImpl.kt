@@ -137,7 +137,6 @@ class SettingsRepositoryImpl @Inject constructor(
             LocalStorageKeys.LABELS_KEY,
             labels
         )
-        println("vladlog: settings: set -> labels: $labels")
     }
 
     override suspend fun getLabels(): Set<Label> {
@@ -155,7 +154,6 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun clearLabels(setOfLabels: Set<Label>) {
         val labels = getLabels()
         val newLabels = labels.minus(setOfLabels)
-        println("vladlog: settings: clear -> newLabels: $newLabels")
         setLabels(newLabels)
     }
 }

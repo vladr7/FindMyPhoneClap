@@ -115,7 +115,6 @@ class AudioClassificationServiceImpl @Inject constructor(
         val newLabels = audioTFLite.serviceSettings.labels.toMutableSet()
         newLabels.addAll(setOfLabels)
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(labels = newLabels)
-        println("vladlog: Audio: setLabels: newLabels: $newLabels")
     }
 
     override fun clearLabels(setOfLabels: Set<Label>) {
@@ -123,7 +122,6 @@ class AudioClassificationServiceImpl @Inject constructor(
             return
         }
         val newLabels = audioTFLite.serviceSettings.labels.toMutableSet().minus(setOfLabels)
-        println("vladlog: Audio: clearLabels: newLabels: $newLabels")
         audioTFLite.serviceSettings = audioTFLite.serviceSettings.copy(labels = newLabels)
     }
 }
