@@ -138,6 +138,10 @@ Here i will post some screenshots to ilustrate how the app works.
 
  <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss4.png" width="320">
 
+ Video demo
+
+ [Demo](https://github.com/vladr7/FindMyPhoneClap/assets/93397265/e8642a80-97da-4d4c-9a6e-c9aacec084c4)
+
 <!-- CONTRIBUTING -->
 ## Contributing
 
