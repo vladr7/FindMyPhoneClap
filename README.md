@@ -188,9 +188,7 @@ App is published on play store: [Playstore](https://play.google.com/store/apps/d
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [Lottie animations](https://lottiefiles.com/)
 * [Android Icons](https://icons8.com/icons/set/android)
-* [Lexica Images AI](https://lexica.art/aperture)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
