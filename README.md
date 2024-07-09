@@ -126,37 +126,13 @@ And then import it to Android Studio
 
 Here i will post some screenshots to ilustrate how the app works.
 
-1. Login Screen
-
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/signin.png" width="320">
-
-2. Choose what type of recipe to generate
-
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/choices.png" width="320">
-
-3. Insert a recipe
-
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/insert.png" width="320">
-
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/sushi.png" width="320">
+ <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss1.png" width="320">
  
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ingredients.png" width="320">
+ <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss2" width="320">
 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/congrats.png" width="320">
- 
-4. Generate a deliciously random recipe!
+ <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss3" width="320">
 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/generate1.png" width="320">
- 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/generate2.png" width="320">
- 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/generate3.png" width="320">
-
- 5. Or just search for a recipe!
-
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/Foculete.jpeg" width="320">
- 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/SearchScreen.jpeg" width="320">
+ <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss4" width="320">
 
 <!-- CONTRIBUTING -->
 ## Contributing
