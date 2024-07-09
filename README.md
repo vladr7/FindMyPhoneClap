@@ -182,7 +182,7 @@ Project Link: [Link](https://github.com/vladr7/FindMyPhoneClap)
 
 ## Published
 
-App is published on play store: [Playstore](https://play.google.com/store/apps/details?id=com.riviem.FindMyPhoneClap)
+App is published on play store: [Playstore](https://play.google.com/store/apps/details?id=com.riviem.findmyphoneclap&hl=en)
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
