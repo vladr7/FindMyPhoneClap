@@ -91,9 +91,10 @@ This project was built with an intention to learn even more about some Android s
 * [Compose](https://developer.android.com/jetpack/compose)
 * [Coroutines](https://developer.android.com/studio](https://kotlinlang.org/docs/coroutines-overview.html))
 * [Flows](https://developer.android.com/kotlin/flow)
-* [Room](https://developer.android.com/training/data-storage/room)
 * [DataStore](https://developer.android.com/topic/libraries/architecture/datastore)
 * [HILT](https://dagger.dev/hilt/)
+* [TfLite](https://www.tensorflow.org/lite)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
