@@ -81,7 +81,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project was built with an intention to learn even more about some Android specifics but mostly I was curious about how to implement an AI listener and use it in some App. I integrated AI sound recognition with this API: [TfLite] (https://www.tensorflow.org/lite)
+This project was built with an intention to learn even more about some Android specifics but mostly I was curious about how to implement an AI listener and use it in some App. I integrated AI sound recognition with this API: [TfLite](https://www.tensorflow.org/lite)
 
 ### Built With
 
