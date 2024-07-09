@@ -81,6 +81,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+*Ever left your phone in a couch cushion or on a silent mode somewhere in your house? With 2ClapsAway, you don't need to panic or search frantically. Simply clap twice, and your phone will ring, guiding you right to it. Simplify your life and reduce daily stress; your device is always just two claps away.*
+
 This project was built with an intention to learn even more about some Android specifics but mostly I was curious about how to implement an AI listener and use it in some App. I integrated AI sound recognition with this API: [TfLite](https://www.tensorflow.org/lite). See this for specific implementation: [Integration](https://www.tensorflow.org/lite/android/tutorials/audio_classification) or just check out how I implemented.
 
 ### Built With
