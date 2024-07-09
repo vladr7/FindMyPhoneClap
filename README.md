@@ -30,7 +30,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/chefgirlcircle-overlay512.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">2 Claps Away</h3>
@@ -38,13 +38,13 @@
   <p align="center">
   Find your phone by clapping!
     <br />
-    <a href="https://github.com/vladr7/EmaFoods"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/vladr7/FindMyPhoneClap"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     ·
-    <a href="https://github.com/vladr7/EmaFoods/issues">Report Bug</a>
+    <a href="https://github.com/vladr7/FindMyPhoneClap/issues">Report Bug</a>
     ·
-    <a href="https://github.com/vladr7/EmaFoods/issues">Request Feature</a>
+    <a href="https://github.com/vladr7/FindMyPhoneClap/issues">Request Feature</a>
   </p>
 </div>
 
@@ -116,7 +116,7 @@ You can download it here: https://developer.android.com/studio
 
 You just Clone the repo 
    ```sh
-   git clone https://github.com/vladr7/EmaFoods.git
+   git clone https://github.com/vladr7/FindMyPhoneClap.git
    ```
 
 And then import it to Android Studio
@@ -126,13 +126,13 @@ And then import it to Android Studio
 
 Here i will post some screenshots to ilustrate how the app works.
 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss1.png" width="320">
+ <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss1.png" width="320">
  
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss2" width="320">
+ <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss2.png" width="320">
 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss3" width="320">
+ <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss3.png" width="320">
 
- <img src="https://github.com/vladr7/EmaFoods/blob/main/images/ss4" width="320">
+ <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss4.png" width="320">
 
 <!-- CONTRIBUTING -->
 ## Contributing
@@ -168,13 +168,13 @@ Email: ricean.vlad7@gmail.com
 
 Linkedin: [Profile](https://www.linkedin.com/in/vlad-ricean-12155622a/)
 
-Project Link: [Link](https://github.com/vladr7/EmaFoods)
+Project Link: [Link](https://github.com/vladr7/FindMyPhoneClap)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Published
 
-App is published on play store: [Playstore](https://play.google.com/store/apps/details?id=com.riviem.emafoods)
+App is published on play store: [Playstore](https://play.google.com/store/apps/details?id=com.riviem.FindMyPhoneClap)
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
@@ -189,14 +189,14 @@ App is published on play store: [Playstore](https://play.google.com/store/apps/d
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/vladr7/EmaFoods.svg?style=for-the-badge
-[contributors-url]: https://github.com/vladr7/EmaFoods/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/vladr7/EmaFoods.svg?style=for-the-badge
-[forks-url]: https://github.com/vladr7/EmaFoods/network/members
-[stars-shield]: https://img.shields.io/github/stars/vladr7/EmaFoods.svg?style=for-the-badge
-[stars-url]: https://github.com/vladr7/EmaFoods/stargazers
-[issues-shield]: https://img.shields.io/github/issues/vladr7/EmaFoods.svg?style=for-the-badge
-[issues-url]: https://github.com/vladr7/EmaFoods/issues
+[contributors-shield]: https://img.shields.io/github/contributors/vladr7/FindMyPhoneClap.svg?style=for-the-badge
+[contributors-url]: https://github.com/vladr7/FindMyPhoneClap/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/vladr7/FindMyPhoneClap.svg?style=for-the-badge
+[forks-url]: https://github.com/vladr7/FindMyPhoneClap/network/members
+[stars-shield]: https://img.shields.io/github/stars/vladr7/FindMyPhoneClap.svg?style=for-the-badge
+[stars-url]: https://github.com/vladr7/FindMyPhoneClap/stargazers
+[issues-shield]: https://img.shields.io/github/issues/vladr7/FindMyPhoneClap.svg?style=for-the-badge
+[issues-url]: https://github.com/vladr7/FindMyPhoneClap/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/vlad-ricean-12155622a
 
