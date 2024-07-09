@@ -126,9 +126,15 @@ And then import it to Android Studio
 
 Here i will post some screenshots to ilustrate how the app works.
 
+1. Tap on the button for the app to start listening
+
  <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss1.png" width="320">
+
+2. Adjust volume & sensitivity
  
  <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss2.png" width="320">
+
+3. Configure more settings
 
  <img src="https://github.com/vladr7/FindMyPhoneClap/blob/main/images/ss3.png" width="320">
 
